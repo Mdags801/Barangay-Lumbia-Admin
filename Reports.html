@@ -250,6 +250,7 @@
     list.forEach(row => {
       const icon = incidentIcon(row.type);
       const id = row.incidentId || row.id || "";
+      const reporterDisplay = (row.reporter || "Anonymous").split('(')[0].trim();
       const isCoords = !row.location && (row.coords?.lat && row.coords?.lng);
       const location = row.location || (isCoords ? `${Number(row.coords.lat).toFixed(4)}, ${Number(row.coords.lng).toFixed(4)}` : "N/A");
       const status = row.status || "Pending";
@@ -270,6 +271,7 @@
                 ${escapeHtml(status)}
               </span>
             </span>
+            <div style="font-size: 0.85rem; color: #64748b; margin-top: 4px;">Reporter: ${escapeHtml(reporterDisplay)}</div>
           </div>
           <div class="actions">
             <button class="btn view" data-id="${escapeHtml(row.id || id)}" aria-label="View details for report ${id}"><i class="fas fa-eye" aria-hidden="true"></i> View</button>

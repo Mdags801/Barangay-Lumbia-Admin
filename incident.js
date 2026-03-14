@@ -286,7 +286,7 @@ function renderTable() {
         <td>${escapeHtml(visibleId)}</td>
         <td id="${locCellId}">${escapeHtml(locationText)}</td>
         <td>${escapeHtml(timeText)}</td>
-        <td>${escapeHtml(data.reporter || "Anonymous")}</td>
+        <td>${escapeHtml((data.reporter || "Anonymous").split('(')[0].trim())}</td>
         <td><span class="status ${getStatusClass(data.status)}">${escapeHtml(data.status || "Pending")}</span></td>
       `;
 
@@ -348,7 +348,7 @@ function openIncidentModal(data, id, iconHtml) {
         </span>` : ''}
     </p>
     <p><strong>Time:</strong> ${escapeHtml(timeText)}</p>
-    <p><strong>Reporter:</strong> ${escapeHtml(data.reporter || "Anonymous")}</p>
+    <p><strong>Reporter:</strong> ${escapeHtml((data.reporter || "Anonymous").split('(')[0].trim())}</p>
     <p><strong>Description:</strong> ${escapeHtml(data.description || "No details")}</p>
     ${data.coords?.lat && data.coords?.lng ? `<p style="font-size:.85rem;color:#94a3b8;"><strong>Location:</strong> ${escapeHtml(data.coords.lat)}, ${escapeHtml(data.coords.lng)}</p>` : ""}
   `;

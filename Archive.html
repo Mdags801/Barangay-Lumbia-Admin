@@ -224,7 +224,7 @@
           <td>${escapeHtml(visibleId)}</td>
           <td id="${locCellId}">${escapeHtml(locationText)}</td>
           <td>${escapeHtml(timeText)}</td>
-          <td>${escapeHtml(incident.reporter || "Anonymous")}</td>
+          <td>${escapeHtml((incident.reporter || "Anonymous").split('(')[0].trim())}</td>
           <td><span class="status ${getStatusClass(incident.status || "Archived")}">${escapeHtml(incident.status || "Archived")}</span></td>
           <td>
             <button class="btn restore-btn" data-id="${escapeHtml(id)}" style="padding: 4px 8px; font-size: 0.8rem;">
