@@ -245,6 +245,16 @@
         console.log('[Supabase] Client initialized');
       }
       const supabase = window.supabaseClient;
+      
+      // Check if user is already logged in
+      async function checkActiveSession() {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session && session.user) {
+          console.log('[signup] Active session found, redirecting to portal...');
+          window.location.href = 'index.html';
+        }
+      }
+      checkActiveSession();
 
       // === Attach signup handler to form ===
       const form = document.getElementById('signupForm'); // <-- FIXED ID
