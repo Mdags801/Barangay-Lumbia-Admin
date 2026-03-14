@@ -789,25 +789,47 @@
       // Robust extraction of users from state
       let rawUsers = [];
       try {
+        const state = (presenceChannel && typeof presenceChannel.presenceState === 'function') 
+                       ? presenceChannel.presenceState() 
+                       : {};
         rawUsers = Object.values(state).flat().filter(u => u && (u.user_id || u.email || u.name));
       } catch (err) {
-        console.error('[Presence] State parsing error:', err);
+        console.warn('[Presence] State parsing warning:', err);
       }
       
-      // Deduplicate by user_id
+      // Deduplicate and merge with local data
       const uniqueUsersMap = new Map();
       rawUsers.forEach(u => {
-        const id = u.user_id || u.email;
+        const id = u.user_id || u.email || u.name;
+        if (!id) return;
         if (!uniqueUsersMap.has(id)) {
           uniqueUsersMap.set(id, u);
         } else {
-          // Keep the one with the latest online_at
           const existing = uniqueUsersMap.get(id);
-          if (new Date(u.online_at) > new Date(existing.online_at)) {
-            uniqueUsersMap.set(id, u);
-          }
+          const uTime = new Date(u.online_at || 0).getTime();
+          const eTime = new Date(existing.online_at || 0).getTime();
+          if (uTime > eTime) uniqueUsersMap.set(id, u);
         }
       });
+
+      // FORCED FALLBACK: If I'm logged in but not in the presence state (sync lag), add myself
+      if (currentAuthSession && currentAuthSession.user) {
+        const myId = currentAuthSession.user.id;
+        const myEmail = currentAuthSession.user.email;
+        if (!uniqueUsersMap.has(myId) && !uniqueUsersMap.has(myEmail)) {
+           console.log('[Presence] Patching local user into display list');
+           uniqueUsersMap.set(myId, {
+             user_id: myId,
+             email: myEmail,
+             name: currentUserProfile?.full_name || myEmail.split('@')[0],
+             role: currentUserProfile?.role || 'Admin',
+             status: 'Online',
+             online_at: new Date().toISOString(),
+             is_local_patch: true
+           });
+        }
+      }
+
       const users = Array.from(uniqueUsersMap.values());
       const count = users.length;
 
@@ -824,12 +846,17 @@
       }
 
       if (count === 0) {
-        usersList.innerHTML = `<div class="active-empty-state">
-          <div class="pulse-ring"></div>
-          <i class="fas fa-satellite-dish" style="font-size:2.5rem; color:var(--primary); margin-bottom:15px; opacity:0.6;"></i>
-          <p style="font-weight:600;">Scanning for active units...</p>
-          <span style="font-size:0.8rem; color:var(--text-muted);">Real-time presence is active</span>
-        </div>`;
+        usersList.innerHTML = `
+          <div class="active-empty-state">
+            <div class="pulse-ring"></div>
+            <i class="fas fa-satellite-dish" style="font-size:2.5rem; color:var(--primary); margin-bottom:15px; opacity:0.6;"></i>
+            <p style="font-weight:600;">Searching for active units...</p>
+            <span style="font-size:0.8rem; color:var(--text-muted);">Real-time presence is active</span>
+            <button onclick="startPresenceTracking()" style="margin-top:20px; font-size:0.75rem; color:var(--primary); background:none; border:none; text-decoration:underline; cursor:pointer;">
+               <i class="fas fa-sync"></i> Reconnect
+            </button>
+          </div>
+        `;
         return;
       }
 
@@ -868,9 +895,17 @@
         return Math.floor(diff / 3600) + 'h ago';
       };
 
-      // Sort: Super Admin -> Admin -> Responder -> Citizen
-      const order = { 'Super Admin': 0, 'Admin': 1, 'Responder': 2, 'Citizen': 3 };
-      filteredUsers.sort((a, b) => (order[a.role] || 9) - (order[b.role] || 9));
+      // Sort order config
+      const ROLE_ORDER = ['super admin', 'admin', 'responder', 'citizen', 'staff'];
+      filteredUsers.sort((a, b) => {
+        const roleA = (a.role || 'citizen').toLowerCase();
+        const roleB = (b.role || 'citizen').toLowerCase();
+        let idxA = ROLE_ORDER.indexOf(roleA);
+        let idxB = ROLE_ORDER.indexOf(roleB);
+        if (idxA === -1) idxA = 99;
+        if (idxB === -1) idxB = 99;
+        return idxA - idxB;
+      });
 
       usersList.innerHTML = filteredUsers.map(u => {
         const role = u.role || 'Admin';
@@ -879,45 +914,53 @@
         const name = u.name || u.email || 'Anonymous';
         const isMe = currentAuthSession && (u.user_id === currentAuthSession.user.id || u.email === currentAuthSession.user.email);
 
+        const isActive = isMe || (Date.now() - new Date(u.online_at || 0).getTime()) < 300000; // 5 mins
+
         return `
-          <div class="active-user-card ${isMe ? 'is-me' : ''}" style="border-left: 4px solid ${config.color};">
+          <div class="active-user-card ${isMe ? 'is-me' : ''}" style="border-left: 4px solid ${config.color}; opacity: ${isActive ? 1 : 0.6};">
             <div class="active-user-avatar" style="background:${config.color};">
               ${getInitials(name)}
-              <span class="status-dot online"></span>
+              <span class="status-dot ${isActive ? 'online' : 'away'}"></span>
             </div>
             <div class="active-user-info">
               <div class="active-user-name">
                 ${name} ${isMe ? '<span class="me-pill">YOU</span>' : ''}
+              </div>
+              <div class="active-user-role" style="font-size: 0.7rem; color: ${config.color}; font-weight: 700; text-transform: uppercase;">
+                ${role}
               </div>
               <div class="active-user-time">
                 <i class="fas fa-clock" style="font-size:0.7rem; margin-right:4px;"></i>${timeAgo(u.online_at)}
               </div>
             </div>
             <div class="active-role-group">
-              <span class="role-badge role-${roleClass}" style="background:${config.bg}; color:${config.color};">
-                <i class="fas fa-${config.icon}" style="margin-right:4px; font-size:0.7rem;"></i>${role}
-              </span>
+               <i class="fas fa-${config.icon}" style="color:${config.color}; font-size: 1.1rem; opacity: 0.4;"></i>
             </div>
           </div>
         `;
       }).join('');
     }
 
+    let _presenceJoinPending = false;
     async function startPresenceTracking() {
-      try {
-        if (presenceChannel) {
-          await presenceChannel.unsubscribe();
-          presenceChannel = null;
-        }
+      if (_presenceJoinPending) return;
+      _presenceJoinPending = true;
 
+      try {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session || !session.user) {
           console.log('[Presence] No session found, skipping tracking');
+          _presenceJoinPending = false;
           return;
+        }
+
+        if (presenceChannel) {
+          console.log('[Presence] Re-joining channel...');
+          await presenceChannel.unsubscribe();
         }
         
         currentAuthSession = session;
-        console.log('[Presence] Joining channel with key:', session.user.id);
+        console.log('[Presence] Creating channel for:', session.user.id);
 
         presenceChannel = supabase.channel('app_presence', {
           config: { presence: { key: session.user.id } }
@@ -925,24 +968,14 @@
 
         presenceChannel
           .on('presence', { event: 'sync' }, () => {
-            const state = presenceChannel.presenceState();
-            renderActiveUsers(state);
-          })
-          .on('presence', { event: 'join' }, ({ key, currentPresences }) => {
-            console.log('[Presence] Join event:', key, currentPresences);
-          })
-          .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
-            console.log('[Presence] Leave event:', key, leftPresences);
+            renderActiveUsers();
           })
           .subscribe(async (status) => {
+            console.log('[Presence] Channel status:', status);
             if (status === 'SUBSCRIBED') {
-              console.log('[Presence] Channel subscribed successfully');
-              
-              // Ensure we have profile data
-              if (!currentUserProfile) {
-                const { data } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
-                if (data) currentUserProfile = data;
-              }
+              // Fetch latest profile for tracking
+              const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+              if (profile) currentUserProfile = profile;
 
               const presenceData = {
                 user_id: session.user.id,
@@ -953,13 +986,17 @@
                 online_at: new Date().toISOString()
               };
 
-              console.log('[Presence] Tracking presence:', presenceData);
-              const trackSuccess = await presenceChannel.track(presenceData);
-              console.log('[Presence] Membership tracked:', trackSuccess);
+              console.log('[Presence] Tracking:', presenceData);
+              await presenceChannel.track(presenceData);
+            }
+            if (status === 'CHANNEL_ERROR' || status === 'CLOSED') {
+               _presenceJoinPending = false;
             }
           });
       } catch (err) {
-        console.error('[Presence] Critical system failure:', err);
+        console.error('[Presence] Join failed:', err);
+      } finally {
+        setTimeout(() => { _presenceJoinPending = false; }, 2000);
       }
     }
 
@@ -972,13 +1009,17 @@
         const searchInput = document.getElementById('presenceSearch');
 
         if (fab && drawer) {
-          fab.onclick = () => { drawer.classList.add('open'); overlay.classList.add('open'); };
+          fab.onclick = () => { 
+            drawer.classList.add('open'); 
+            overlay.classList.add('open'); 
+            // Force a render when opening to ensure local user shows up
+            renderActiveUsers(); 
+          };
           closeBtn.onclick = overlay.onclick = () => { drawer.classList.remove('open'); overlay.classList.remove('open'); };
           
           if (searchInput) {
             searchInput.oninput = () => {
-              const state = presenceChannel ? presenceChannel.presenceState() : {};
-              renderActiveUsers(state);
+              renderActiveUsers();
             };
           }
 
