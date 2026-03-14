@@ -12,8 +12,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
     crossorigin="anonymous" referrerpolicy="no-referrer" />
   <!-- Supabase JS SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"
-    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="stylesheet" href="index.css">
   <link rel="stylesheet" href="global.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -789,23 +788,29 @@
 
       // Robust extraction of users from state
       let rawUsers = [];
+      let state = {};
       try {
-        const state = (presenceChannel && typeof presenceChannel.presenceState === 'function') 
+        state = (presenceChannel && typeof presenceChannel.presenceState === 'function') 
                        ? presenceChannel.presenceState() 
                        : {};
+        console.log('[Presence] Raw State:', JSON.stringify(state));
         rawUsers = Object.values(state).flat().filter(u => u && (u.user_id || u.email || u.name));
       } catch (err) {
-        console.warn('[Presence] State parsing warning:', err);
+        console.warn('[Presence] State parsing error:', err);
       }
       
       // Deduplicate and merge with local data
       const uniqueUsersMap = new Map();
       rawUsers.forEach(u => {
+        // Use a composite key to handle multiple devices/sessions if needed, 
+        // but for now we stick to user_id to keep the list clean.
         const id = u.user_id || u.email || u.name;
         if (!id) return;
+        
         if (!uniqueUsersMap.has(id)) {
           uniqueUsersMap.set(id, u);
         } else {
+          // If same user on multiple devices, pick the most recent one
           const existing = uniqueUsersMap.get(id);
           const uTime = new Date(u.online_at || 0).getTime();
           const eTime = new Date(existing.online_at || 0).getTime();
@@ -969,29 +974,43 @@
 
         presenceChannel
           .on('presence', { event: 'sync' }, () => {
+            console.log('[Presence] Sync event received');
+            renderActiveUsers();
+          })
+          .on('presence', { event: 'join' }, ({ key, currentPresences }) => {
+            console.log('[Presence] Joined:', key, currentPresences);
+            renderActiveUsers();
+          })
+          .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+            console.log('[Presence] Left:', key, leftPresences);
             renderActiveUsers();
           })
           .subscribe(async (status) => {
-            console.log('[Presence] Channel status:', status);
+            console.log('[Presence] Subscription Status:', status);
             if (status === 'SUBSCRIBED') {
-              // Fetch latest profile for tracking
-              const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
-              if (profile) currentUserProfile = profile;
+              // Fetch profile data for accurate role/name
+              let profile = currentUserProfile;
+              if (!profile) {
+                const { data } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+                if (data) profile = currentUserProfile = data;
+              }
 
               const presenceData = {
                 user_id: session.user.id,
                 email: session.user.email,
-                name: currentUserProfile?.full_name || session.user.email.split('@')[0],
-                role: currentUserProfile?.role || 'Admin',
+                name: profile?.full_name || session.user.email.split('@')[0],
+                role: profile?.role || 'Admin',
                 status: 'Online',
-                online_at: new Date().toISOString()
+                online_at: new Date().toISOString(),
+                session_id: Math.random().toString(36).substring(7) // Help differentiate devices
               };
 
-              console.log('[Presence] Tracking:', presenceData);
+              console.log('[Presence] Tracking yourself:', presenceData);
               await presenceChannel.track(presenceData);
             }
-            if (status === 'CHANNEL_ERROR' || status === 'CLOSED') {
-               _presenceJoinPending = false;
+            if (status === 'CHANNEL_ERROR') {
+              console.error('[Presence] Channel error. Retrying in 5s...');
+              setTimeout(startPresenceTracking, 5000);
             }
           });
       } catch (err) {
