@@ -164,13 +164,38 @@
             return;
           }
 
-          // Check Role Restriction
-          const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single();
+          // Check Role and Status Restriction
+          const { data: profile } = await supabase.from('profiles').select('role, status').eq('id', data.user.id).single();
           const role = (profile?.role || 'staff').toLowerCase();
+          const status = profile?.status || 'Active';
 
           if (role === 'citizen' || role === 'responder') {
             await supabase.auth.signOut();
             showMsg('Access Denied: This portal is for administrative personnel only.', true);
+            loginBtn.disabled = false;
+            loginBtn.textContent = originalBtnText || 'Log In';
+            return;
+          }
+
+          if (status === 'Pending') {
+            await supabase.auth.signOut();
+            showMsg('Your account is still PENDING approval. Please wait for the Barangay Admin to verify your ID.', true);
+            loginBtn.disabled = false;
+            loginBtn.textContent = originalBtnText || 'Log In';
+            return;
+          }
+
+          if (status === 'Suspended') {
+            await supabase.auth.signOut();
+            showMsg('Your account has been SUSPENDED. Please contact support or the Barangay Admin.', true);
+            loginBtn.disabled = false;
+            loginBtn.textContent = originalBtnText || 'Log In';
+            return;
+          }
+
+          if (status === 'Archived' || status === 'Rejected') {
+            await supabase.auth.signOut();
+            showMsg('This account is no longer active or was rejected during verification.', true);
             loginBtn.disabled = false;
             loginBtn.textContent = originalBtnText || 'Log In';
             return;

@@ -103,6 +103,19 @@ nav[aria-label="Sidebar"] {
   font-weight: 600;
 }
 
+.requests-badge {
+  background: #ff4757;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-left: auto;
+  min-width: 18px;
+  text-align: center;
+  box-shadow: 0 4px 6px -1px rgba(255, 71, 87, 0.4);
+}
+
 .sidebar-link i {
   min-width: 20px;
   text-align: center;
