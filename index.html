@@ -793,42 +793,52 @@
         const state = (presenceChannel && typeof presenceChannel.presenceState === 'function') 
                        ? presenceChannel.presenceState() 
                        : {};
+        
+        // Log for developer troubleshooting
+        console.log('[Presence] Current Sync State Keys:', Object.keys(state));
+        
+        // Extract all presence objects from all users
         rawUsers = Object.values(state).flat().filter(u => u && (u.user_id || u.email || u.name));
       } catch (err) {
         console.warn('[Presence] State parsing warning:', err);
       }
       
-      // Deduplicate and merge with local data
+      // Map to unique users, but keep track of session count
       const uniqueUsersMap = new Map();
       rawUsers.forEach(u => {
         const id = u.user_id || u.email || u.name;
         if (!id) return;
+        
         if (!uniqueUsersMap.has(id)) {
+          u.sessionCount = 1;
           uniqueUsersMap.set(id, u);
         } else {
           const existing = uniqueUsersMap.get(id);
+          existing.sessionCount = (existing.sessionCount || 1) + 1;
+          // Keep the one with the latest activity
           const uTime = new Date(u.online_at || 0).getTime();
           const eTime = new Date(existing.online_at || 0).getTime();
-          if (uTime > eTime) uniqueUsersMap.set(id, u);
+          if (uTime > eTime) {
+            u.sessionCount = existing.sessionCount; // preserve count
+            uniqueUsersMap.set(id, u);
+          }
         }
       });
 
-      // FORCED FALLBACK: If I'm logged in but not in the presence state (sync lag), add myself
-      if (currentAuthSession && currentAuthSession.user) {
+      // Patch local user if literally nothing is in the sync state yet (startup lag)
+      if (currentAuthSession && uniqueUsersMap.size === 0) {
         const myId = currentAuthSession.user.id;
         const myEmail = currentAuthSession.user.email;
-        if (!uniqueUsersMap.has(myId) && !uniqueUsersMap.has(myEmail)) {
-           console.log('[Presence] Patching local user into display list');
-           uniqueUsersMap.set(myId, {
-             user_id: myId,
-             email: myEmail,
-             name: currentUserProfile?.full_name || myEmail.split('@')[0],
-             role: currentUserProfile?.role || 'Admin',
-             status: 'Online',
-             online_at: new Date().toISOString(),
-             is_local_patch: true
-           });
-        }
+        uniqueUsersMap.set(myId, {
+          user_id: myId,
+          email: myEmail,
+          name: currentUserProfile?.full_name || myEmail.split('@')[0],
+          role: currentUserProfile?.role || 'Admin',
+          status: 'Online',
+          online_at: new Date().toISOString(),
+          is_local_patch: true,
+          sessionCount: 1
+        });
       }
 
       const users = Array.from(uniqueUsersMap.values());
@@ -851,10 +861,10 @@
           <div class="active-empty-state">
             <div class="pulse-ring"></div>
             <i class="fas fa-satellite-dish" style="font-size:2.5rem; color:var(--primary); margin-bottom:15px; opacity:0.6;"></i>
-            <p style="font-weight:600;">Searching for active units...</p>
-            <span style="font-size:0.8rem; color:var(--text-muted);">Real-time presence is active</span>
-            <button onclick="startPresenceTracking()" style="margin-top:20px; font-size:0.75rem; color:var(--primary); background:none; border:none; text-decoration:underline; cursor:pointer;">
-               <i class="fas fa-sync"></i> Reconnect
+            <p style="font-weight:600;">Connecting to network...</p>
+            <span style="font-size:0.8rem; color:var(--text-muted);">Syncing secure channels</span>
+            <button onclick="startPresenceTracking()" class="presence-retry-btn">
+               <i class="fas fa-sync"></i> TAP TO RECONNECT
             </button>
           </div>
         `;
@@ -908,14 +918,7 @@
         return idxA - idxB;
       });
 
-      usersList.innerHTML = filteredUsers.map(u => {
-        const role = u.role || 'Admin';
-        const config = ROLE_CONFIG[role] || ROLE_CONFIG['Default'];
-        const roleClass = role.toLowerCase().replace(/\s+/g, '-');
-        const name = u.name || u.email || 'Anonymous';
-        const isMe = currentAuthSession && (u.user_id === currentAuthSession.user.id || u.email === currentAuthSession.user.email);
-
-        const isActive = isMe || (Date.now() - new Date(u.online_at || 0).getTime()) < 300000; // 5 mins
+        const isActive = isMe || (Date.now() - new Date(u.online_at || 0).getTime()) < 600000; // 10 mins
 
         return `
           <div class="active-user-card ${isMe ? 'is-me' : ''}" style="border-left: 4px solid ${config.color}; opacity: ${isActive ? 1 : 0.6};">
@@ -927,11 +930,12 @@
               <div class="active-user-name">
                 ${name} ${isMe ? '<span class="me-pill">YOU</span>' : ''}
               </div>
-              <div class="active-user-role" style="font-size: 0.7rem; color: ${config.color}; font-weight: 700; text-transform: uppercase;">
+              <div class="active-user-role" style="font-size: 0.65rem; color: ${config.color}; font-weight: 800; text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
                 ${role}
+                ${u.sessionCount > 1 ? `<span class="session-badge" title="Active on ${u.sessionCount} devices"><i class="fas fa-mobile-alt"></i> ${u.sessionCount}</span>` : ''}
               </div>
               <div class="active-user-time">
-                <i class="fas fa-clock" style="font-size:0.7rem; margin-right:4px;"></i>${timeAgo(u.online_at)}
+                <i class="fas fa-clock" style="font-size:0.7rem; margin-right:4px;"></i>${isMe ? 'Online' : timeAgo(u.online_at)}
               </div>
             </div>
             <div class="active-role-group">
