@@ -395,9 +395,6 @@
 
     // --- Authentication State Management ---
     let currentUserProfile = null;
-    let currentAuthSession = null;
-    let presenceChannel = null;
-    let presenceUIInitialized = false;
 
     async function updateAuthUI(user) {
       const userInfo = document.getElementById('user-info');
@@ -1146,7 +1143,6 @@
       checkAuth();
       initGlobalAlarm();
       subscribeGlobalIncidents();
-      initPresenceSystem();
       monitorAccountRequests();
     });
 
