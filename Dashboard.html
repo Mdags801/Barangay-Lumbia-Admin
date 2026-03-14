@@ -314,7 +314,10 @@
 
   <script>
     // ---------- Supabase config ----------
-    const supabaseDashboard = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const SUPABASE_URL = 'https://tukkkwtxuaxrbihyammp.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_23puPo1jOwFggf-4YTitRg_BQiGQl9P';
+    // Use the global supabase object from the CDN
+    const supabaseDashboard = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     const MAPTILER_KEY = "31um5bDFFFAugzBg82HC";
 
     // ---------- Reverse Geocoding ----------
@@ -424,9 +427,9 @@
     function getStatusClass(status) {
       if (!status) return "unknown";
       const s = status.toLowerCase();
-      if (s.includes("pend")) return "pending";
+      if (s.includes("pend") || s.includes("await")) return "pending";
       if (s.includes("enroute") || s.includes("on-going") || s.includes("ongoing") || s.includes("en route") || s.includes("dispatch")) return "enroute";
-      if (s.includes("resolv")) return "resolved";
+      if (s.includes("resolv") || s.includes("closed") || s.includes("done")) return "resolved";
       return "unknown";
     }
 
@@ -479,7 +482,7 @@
       const todayStr = new Date().toISOString().slice(0, 10);
 
       allIncidents.forEach(incident => {
-        const typeText = incident.type || "Unknown";
+        const typeText = incident.type || incident.incident_type || "Unknown";
         switch (typeText.toLowerCase()) {
           case "fire": fire++; break;
           case "medical": medical++; break;
@@ -488,16 +491,20 @@
           default: others++;
         }
         const s = (incident.status || "").toLowerCase();
-        const isResolved = s.includes("resolv");
-        const incidentDate = (incident.reportedAt ? new Date(incident.reportedAt) : (incident.time ? new Date(incident.time) : null));
-        const incidentDateStr = incidentDate && !isNaN(incidentDate) ? incidentDate.toISOString().slice(0, 10) : null;
+        const isResolved = s.includes("resolv") || s.includes("closed") || s.includes("done");
+        
+        // Robust date extraction
+        const rawDate = incident.reportedAt || incident.reported_at || incident.time || incident.created_at;
+        const incidentDate = rawDate ? new Date(rawDate) : null;
+        const incidentDateStr = incidentDate && !isNaN(incidentDate.getTime()) ? incidentDate.toISOString().slice(0, 10) : null;
 
         if (isResolved) {
           if (incidentDateStr === todayStr) resolvedToday++;
           
           // Calculate real response time if available
-          const start = incident.reportedAt ? new Date(incident.reportedAt) : (incident.time ? new Date(incident.time) : null);
-          const end = (incident.acceptedAt || incident.respondedAt) ? new Date(incident.acceptedAt || incident.respondedAt) : null;
+          const start = incidentDate;
+          const endRaw = incident.acceptedAt || incident.accepted_at || incident.respondedAt || incident.responded_at;
+          const end = endRaw ? new Date(endRaw) : null;
           
           if (start && end && !isNaN(start.getTime()) && !isNaN(end.getTime())) {
             const diffMin = (end.getTime() - start.getTime()) / (1000 * 60);
@@ -549,15 +556,18 @@
           const statusText = incident.status || "Pending";
           const isCoords = !incident.location && (incident.coords?.lat && incident.coords?.lng);
           const locationText = incident.location || (isCoords ? `${Number(incident.coords.lat).toFixed(4)}, ${Number(incident.coords.lng).toFixed(4)}` : "N/A");
+          const displayTime = formatTime(incident.reportedAt || incident.reported_at || incident.time || incident.created_at);
+          const displayType = incident.type || incident.incident_type || "Unknown";
+          const docId = incident.id || incident.incidentId || "inc";
           
           const tr = document.createElement("tr");
           tr.style.cursor = "pointer";
-          const locCellId = `d-loc-${incident.id}-${Math.random().toString(36).substr(2, 5)}`;
+          const locCellId = `d-loc-${docId}-${Math.random().toString(36).substr(2, 5)}`;
           
-          tr.onclick = () => window.parent.openGlobalIncidentModal(incident.id);
+          tr.onclick = () => window.parent.openGlobalIncidentModal(incident.id || incident.incidentId);
           tr.innerHTML = `
-            <td>${formatTime(incident.reportedAt || incident.time)}</td>
-            <td>${incident.type || "Unknown"}</td>
+            <td>${displayTime}</td>
+            <td>${displayType}</td>
             <td id="${locCellId}">${locationText}</td>
             <td><span class="status ${getStatusClass(statusText)}">${statusText}</span></td>
           `;
@@ -625,8 +635,13 @@
     // ---------- Fetch History ----------
     async function fetchIncidents() {
       try {
+        console.log("Dashboard: Fetching incidents...");
         const { data, error } = await supabaseDashboard.from('incidents').select('*');
-        if (error) throw error;
+        if (error) {
+          console.error("Dashboard Supabase error:", error);
+          throw error;
+        }
+        console.log("Dashboard: Data received:", data?.length || 0, "rows");
         allIncidents = data || [];
         renderUI();
       } catch (err) {
