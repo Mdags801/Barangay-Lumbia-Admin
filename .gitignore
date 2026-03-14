@@ -1,0 +1,4 @@
+.vscode/
+.cursor/
+*.log
+.DS_Store
