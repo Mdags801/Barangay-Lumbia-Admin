@@ -787,13 +787,28 @@
       if (!badge || !countEl || !usersList) return;
 
       // Robust extraction of users from state
-      let users = [];
+      let rawUsers = [];
       try {
-        users = Object.values(state).flat().filter(u => u && (u.email || u.name));
+        rawUsers = Object.values(state).flat().filter(u => u && (u.user_id || u.email || u.name));
       } catch (err) {
         console.error('[Presence] State parsing error:', err);
       }
       
+      // Deduplicate by user_id
+      const uniqueUsersMap = new Map();
+      rawUsers.forEach(u => {
+        const id = u.user_id || u.email;
+        if (!uniqueUsersMap.has(id)) {
+          uniqueUsersMap.set(id, u);
+        } else {
+          // Keep the one with the latest online_at
+          const existing = uniqueUsersMap.get(id);
+          if (new Date(u.online_at) > new Date(existing.online_at)) {
+            uniqueUsersMap.set(id, u);
+          }
+        }
+      });
+      const users = Array.from(uniqueUsersMap.values());
       const count = users.length;
 
       // Update UI counts
@@ -934,6 +949,7 @@
                 email: session.user.email,
                 name: currentUserProfile?.full_name || session.user.email.split('@')[0],
                 role: currentUserProfile?.role || 'Admin',
+                status: 'Online',
                 online_at: new Date().toISOString()
               };
 
