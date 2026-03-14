@@ -395,6 +395,9 @@
 
     // --- Authentication State Management ---
     let currentUserProfile = null;
+    let presenceChannel = null;
+    let presenceUIInitialized = false;
+    let currentAuthSession = null;
 
     async function updateAuthUI(user) {
       const userInfo = document.getElementById('user-info');
@@ -774,9 +777,6 @@
     // ACTIVE USERS PRESENCE SYSTEM
     // =============================================================
 
-    let presenceChannel = null;
-    let presenceUIInitialized = false;
-    let currentAuthSession = null;
 
     function renderActiveUsers(state) {
       console.log('[Presence] Rendering state:', state);
