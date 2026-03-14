@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Correct Supabase SDK include -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Initialize client once SDK is parsed
+    window.supabase = supabase.createClient(
+      "https://tukkkwtxuaxrbihyammp.supabase.co",
+      "sb_publishable_23puPo1jOwFggf-4YTitRg_BQiGQl9P",
+      { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false } }
+    );
+    console.log("[Supabase] Client initialized");
+  </script>
+
+
+  <meta charset="utf-8" />
+  <title>Sign Up</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"
+    onload="(function(){ try { window.supabase = window.supabase || supabase.createClient('https://tukkkwtxuaxrbihyammp.supabase.co','sb_publishable_23puPo1jOwFggf-4YTitRg_BQiGQl9P',{ auth:{ persistSession:true, autoRefreshToken:true, detectSessionInUrl:false } }); console.log('[signup] supabase onload init'); } catch(e){ console.error('[signup] onload init failed', e); } })();"
+    crossorigin="anonymous"></script>
+
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="global.css">
+  <link rel="stylesheet" href="auth.css">
+  <style>
+    /* Helpers */
+
+    .btn-loading {
+      position: relative;
+    }
+
+    .btn-loading .spinner {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid rgba(0, 0, 0, 0.12);
+      border-top-color: rgba(0, 0, 0, 0.6);
+      animation: spin .9s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .btn-success {
+      animation: successPulse .42s ease forwards;
+      background: linear-gradient(90deg, #16a34a, #059669);
+      color: #fff !important;
+      border-color: transparent !important;
+    }
+
+    @keyframes successPulse {
+      0% {
+        transform: scale(1);
+        box-shadow: none
+      }
+
+      50% {
+        transform: scale(1.04);
+        box-shadow: 0 8px 24px rgba(5, 150, 105, 0.18)
+      }
+
+      100% {
+        transform: scale(1);
+        box-shadow: none
+      }
+    }
+
+    input,
+    button {
+      transition: box-shadow .12s ease, transform .08s ease;
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+  </style>
+</head>
+
+<body>
+  <main class="auth-shell">
+    <div class="auth-card">
+      <section class="auth-form" aria-label="Sign up form">
+        <div class="brand">
+          <div class="logo">BD</div>
+          <div>
+            <div style="font-weight:800">Barangay Based Emergency Response System</div>
+            <div class="small">Create an admin account</div>
+          </div>
+        </div>
+
+        <h1>Create an account</h1>
+        <p class="lead">Register with your official email.</p>
+
+        <form id="signupForm" novalidate>
+          <div class="field">
+            <label for="suFullName">Full name</label>
+            <input id="suFullName" name="fullName" type="text" autocomplete="name" placeholder="Juan Dela Cruz" />
+          </div>
+
+          <div class="field">
+            <label for="suEmail">Email</label>
+            <input id="suEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" required />
+          </div>
+
+          <div class="field">
+            <label for="suPassword">Password</label>
+            <input id="suPassword" name="password" type="password" autocomplete="new-password"
+              placeholder="Choose a strong password" required />
+          </div>
+
+          <div class="field">
+            <label for="suConfirm">Confirm Password</label>
+            <!-- FIXED: name must match script -->
+            <input id="suConfirm" name="confirm_password" type="password" placeholder="Repeat password" required />
+          </div>
+
+          <div class="actions">
+            <button id="createBtn" class="btn-primary" type="submit">Create account</button>
+            <button id="backLogin" class="btn-ghost" type="button" onclick="window.location.href='login.html'">Back to
+              login</button>
+          </div>
+        </form>
+
+        <div id="suMsg" aria-live="polite"></div>
+      </section>
+
+      <aside class="auth-visual" aria-hidden="true">
+        <div>
+          <div style="font-weight:700">Secure access for barangay admins</div>
+          <div class="visual-icons" aria-hidden="true" style="margin-top:18px">
+            <div class="visual-icon">🛡️</div>
+            <div class="visual-icon">📞</div>
+            <div class="visual-icon">📍</div>
+          </div>
+        </div>
+        <div class="small">After sign up, check your email for confirmation if enabled.</div>
+      </aside>
+    </div>
+  </main>
+
+  <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // === CONFIGURATION ===
+    const SUPABASE_URL = 'https://tukkkwtxuaxrbihyammp.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_23puPo1jOwFggf-4YTitRg_BQiGQl9P';
+
+    function showMsg(msg, type) {
+      const msgBox = document.getElementById('msg-box');
+      if (msgBox) {
+        msgBox.textContent = msg;
+        msgBox.className = type || '';
+        msgBox.style.display = 'block';
+      } else {
+        showToast(msg, type || 'info');
+      }
+    }
+    function showToast(msg, type) {
+      let container = document.getElementById('toastContainer');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container';
+        container.setAttribute('aria-live', 'polite');
+        container.setAttribute('aria-atomic', 'true');
+        document.body.appendChild(container);
+      }
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      const iconClass = type === 'error' || type === 'danger' ? 'times-circle' : type === 'success' ? 'check-circle' : 'info-circle';
+      toast.innerHTML = `<div class="icon"><i class="fas fa-${iconClass}"></i></div><div class="content"><strong>Notification</strong><br/>${msg}</div><button class="close">&times;</button>`;
+      container.appendChild(toast);
+      requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('show')));
+      const hide = () => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 200); };
+      toast.querySelector('.close').onclick = hide;
+      setTimeout(hide, 5000);
+    }
+    function withButtonLoading(button, fn) {
+      if (!button) return fn();
+      const originalText = button.textContent;
+      button.disabled = true;
+      button.textContent = 'Loading...';
+      return Promise.resolve(fn()).finally(() => {
+        button.disabled = false;
+        button.textContent = originalText;
+      });
+    }
+    const backLogin = document.getElementById('backLogin');
+    if (backLogin) {
+      backLogin.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.location.href = '/login.html'; // adjust path if needed
+      });
+    }
+
+    // === Wait for SDK and DOM ===
+    function waitForSupabaseSDK(callback, maxAttempts = 50, interval = 100) {
+      let attempts = 0;
+      (function check() {
+        if (window.supabase && typeof window.supabase.createClient === 'function') {
+          callback();
+        } else if (++attempts < maxAttempts) {
+          setTimeout(check, interval);
+        } else {
+          console.error('Supabase SDK failed to load after waiting.');
+          showMsg('Supabase SDK failed to load. Please refresh the page.', 'error');
+        }
+      })();
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      waitForSupabaseSDK(initializeSignup);
+    });
+
+    function initializeSignup() {
+      // === Create global Supabase client only once ===
+      if (!window.supabaseClient) {
+        window.supabaseClient = window.supabase.createClient(
+          SUPABASE_URL,
+          SUPABASE_ANON_KEY,
+          {
+            auth: {
+              autoRefreshToken: true,
+              persistSession: true,
+              detectSessionInUrl: true
+            }
+          }
+        );
+        console.log('[Supabase] Client initialized');
+      }
+      const supabase = window.supabaseClient;
+
+      // === Attach signup handler to form ===
+      const form = document.getElementById('signupForm'); // <-- FIXED ID
+      if (!form) {
+        console.error('Signup form with id="signupForm" not found.');
+        return;
+      }
+      form.removeEventListener('submit', handleSignup);
+      form.addEventListener('submit', handleSignup);
+
+      async function handleSignup(event) {
+        event.preventDefault();
+        showMsg('', '');
+
+        const email = form.elements['email']?.value?.trim();
+        const password = form.elements['password']?.value || '';
+        const confirmPassword = form.elements['confirm_password']?.value || '';
+        const submitBtn = form.querySelector('[type="submit"]');
+
+        if (!email) {
+          showMsg('Please enter your email address.', 'error');
+          form.elements['email']?.focus();
+          return;
+        }
+        if (!isValidEmail(email)) {
+          showMsg('Please enter a valid email address.', 'error');
+          form.elements['email']?.focus();
+          return;
+        }
+        if (!password) {
+          showMsg('Please enter a password.', 'error');
+          form.elements['password']?.focus();
+          return;
+        }
+        if (!isValidPassword(password)) {
+          showMsg('Password must be at least 8 characters.', 'error');
+          form.elements['password']?.focus();
+          return;
+        }
+        if (password !== confirmPassword) {
+          showMsg('Passwords do not match.', 'error');
+          form.elements['confirm_password']?.focus();
+          return;
+        }
+
+        await withButtonLoading(submitBtn, async () => {
+          showMsg('Signing up...', 'info');
+          console.log('[Supabase] Attempting signUp for:', email);
+
+          try {
+            const { data, error } = await supabase.auth.signUp({ email, password });
+            console.log('[Supabase] signUp response:', data, error);
+
+            if (error) {
+              showMsg(error.message || 'Signup failed. Please try again.', 'error');
+              showToast && showToast(error.message || 'Signup failed.', 'error');
+              return;
+            }
+
+            if (data?.user) {
+              // INSERT INTO PROFILES TABLE
+              const fullName = form.elements['fullName']?.value?.trim() || 'User';
+              const { error: profileError } = await supabase
+                .from('profiles')
+                .upsert({
+                  id: data.user.id,
+                  full_name: fullName,
+                  email: email,
+                  role: 'staff', // Default role
+                  status: 'Active'
+                });
+
+              if (profileError) {
+                console.error('[Supabase] Profile creation failed:', profileError);
+                // We don't block login if profile fail, but log it
+              }
+
+              if (Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+                // Fetch the role to show in the modal
+                const { data: existingProfile } = await supabase
+                  .from('profiles')
+                  .select('role')
+                  .eq('email', email)
+                  .single();
+
+                const roleName = existingProfile?.role || 'User';
+
+                showAlreadyRegisteredModal(email, roleName);
+              } else {
+                showMsg('Signup successful! Please check your email to confirm your account.', 'success');
+                showToast && showToast('Signup successful! Check your email.', 'success');
+              }
+            } else {
+              showMsg('Signup request completed. Please check your email.', 'info');
+            }
+
+            try {
+              const msg = { type: 'signup-success', email };
+              if (window.opener && !window.opener.closed) {
+                window.opener.postMessage(msg, '*');
+                console.log('[Supabase] postMessage sent to opener');
+              } else if (window.parent && window.parent !== window) {
+                window.parent.postMessage(msg, '*');
+                console.log('[Supabase] postMessage sent to parent');
+              }
+            } catch (pmErr) {
+              console.warn('[Supabase] postMessage failed:', pmErr);
+            }
+
+            setTimeout(() => {
+              window.location.href = 'login.html';
+            }, 1500);
+
+          } catch (err) {
+            console.error('[Supabase] signUp exception:', err);
+            showMsg('An unexpected error occurred. Please try again.', 'error');
+            showToast && showToast('Unexpected error during signup.', 'error');
+          }
+        });
+      }
+
+      function isValidEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      }
+      function isValidPassword(password) {
+        return typeof password === 'string' && password.length >= 8;
+      }
+
+      console.log('[Supabase] SDK version:', window.supabase?.version || 'unknown');
+      console.log('[Supabase] Client ready:', !!window.supabaseClient);
+    }
+
+    function showAlreadyRegisteredModal(email, role) {
+      const modal = document.getElementById('alertModal');
+      const title = document.getElementById('alertTitle');
+      const text = document.getElementById('alertText');
+
+      if (!modal) return;
+
+      title.textContent = "Account Found";
+      text.innerHTML = `The email <strong>${email}</strong> is already registered as <strong>${role}</strong>. Please log in instead.`;
+
+      modal.style.display = 'flex';
+    }
+
+    function closeModals() {
+      document.querySelectorAll('.custom-modal').forEach(m => m.style.display = 'none');
+    }
+  </script>
+
+  <!-- Custom Alert Modal -->
+  <div id="alertModal" class="custom-modal" role="alertdialog" aria-modal="true" aria-labelledby="alertTitle">
+    <div class="card-modal">
+      <div id="alertIconCircle" class="modal-icon-circle icon-info">
+        <i id="alertIcon" class="fas fa-user-check" aria-hidden="true"></i>
+      </div>
+      <h2 id="alertTitle" style="margin:0 0 8px; font-size:1.5rem;">Notification</h2>
+      <p id="alertText" style="color:#64748b; margin:0; line-height:1.5;">Message content goes here.</p>
+      <div class="modal-actions-custom" style="justify-content:center; margin-top:24px;">
+        <button class="btn-confirm" onclick="window.location.href='login.html'" style="max-width:200px;">Go to
+          Login</button>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

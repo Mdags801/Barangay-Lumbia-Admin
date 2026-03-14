@@ -1,0 +1,337 @@
+:root {
+  --primary: #2563eb;
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --border: #e2e8f0;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+body {
+  margin: 0;
+  padding: 16px 24px 24px;
+  /* Reduced top padding */
+  background: var(--bg);
+  font-family: 'Inter', -apple-system, sans-serif;
+  color: var(--text-main);
+  line-height: 1.5;
+}
+
+header {
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 32px;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border-radius: var(--radius-lg);
+  color: white;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  overflow: hidden;
+  animation: fadeInDown 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+header::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -10%;
+  width: 120%;
+  height: 200%;
+  background: radial-gradient(circle at top right, rgba(37, 99, 235, 0.1), transparent 40%);
+  pointer-events: none;
+}
+
+header h1 {
+  font-size: 2.2rem;
+  font-weight: 900;
+  margin: 0;
+  letter-spacing: -0.03em;
+  color: #ffffff;
+}
+
+header p {
+  color: #94a3b8;
+  font-weight: 500;
+  font-size: 1rem;
+  margin-top: 4px;
+}
+
+/* Controls Hub */
+.controls {
+  background: white;
+  padding: 20px 24px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.controls .left {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex: 1;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.controls .left>div:first-child {
+  flex: 1;
+  min-width: 180px;
+  max-width: 360px;
+}
+
+.controls input[type="text"] {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 20px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  font-size: 0.9rem;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.controls input[type="text"]:focus {
+  background: white;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+.controls select {
+  padding: 11px 14px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  font-weight: 600;
+  font-size: 0.9rem;
+  outline: none;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.status-filters {
+  display: flex;
+  gap: 8px;
+  background: #f1f5f9;
+  padding: 6px;
+  border-radius: 14px;
+}
+
+.status-filters button {
+  padding: 8px 18px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.85rem;
+}
+
+.status-filters button.active {
+  background: white;
+  color: var(--primary);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Table Design */
+.table-wrap {
+  background: white;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  text-align: left;
+  padding: 16px 24px;
+  background: #fbfdff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+td {
+  padding: 18px 24px;
+  font-size: 0.95rem;
+  color: #475569;
+  border-bottom: 1px solid #f8fafc;
+}
+
+tr:hover {
+  background: #fbfdff;
+  cursor: pointer;
+}
+
+/* Status Pills */
+.status {
+  padding: 6px 14px;
+  border-radius: 99px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.status.pending {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.status.enroute {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.status.resolved {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+/* Action Buttons */
+.btn {
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-weight: 750;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  border: none;
+  cursor: pointer;
+}
+
+.create-btn {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+}
+
+.create-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+}
+
+/* Modal Enhancements */
+.modal {
+  display: none;
+  /* Hidden by default, toggled to flex via JS */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 20px;
+  padding: 32px;
+  width: 90%;
+  max-width: 550px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  animation: scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.modal .close {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  font-size: 1.5rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.modal .close:hover {
+  color: var(--text-main);
+}
+
+
+#incidentMap {
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  margin: 20px 0;
+}
+
+/* Animations */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+@media (max-width: 900px) {
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .controls .left {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .status-filters {
+    overflow-x: auto;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleUp {
+  from {
+    transform: scale(0.95) translateY(10px);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
