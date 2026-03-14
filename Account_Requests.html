@@ -368,8 +368,8 @@
         const { data, error } = await supabase
           .from('profiles')
           .select('*')
-          .eq('status', 'Pending')
-          .order('id', { ascending: false });
+          .eq('status', 'Pending');
+          // Removed ordering by ID as it's a UUID, if created_at exists it will be sorted later
 
         if (error) throw error;
 
@@ -384,29 +384,32 @@
           return;
         }
 
+        // Sort by name or fallback to ID
+        data.sort((a, b) => b.id.localeCompare(a.id)); 
+
         container.innerHTML = '';
         data.forEach(req => {
           const card = document.createElement('div');
           card.className = 'request-card';
           
           const roleClass = `role-${(req.role || 'citizen').toLowerCase()}`;
-          const initials = (req.full_name || 'U').charAt(0).toUpperCase();
+          const initials = (req.full_name || req.name || 'U').charAt(0).toUpperCase();
 
           card.innerHTML = `
             <div class="user-avatar">${initials}</div>
             <div class="user-info">
-              <h3>${req.full_name || 'Unnamed User'}</h3>
+              <h3>${req.full_name || req.name || 'Unnamed User'}</h3>
               <p><i class="fas fa-envelope"></i> ${req.email}</p>
               <span class="role-badge ${roleClass}">${req.role || 'Citizen'}</span>
             </div>
             <div style="display:flex; align-items:center; gap:24px;">
               <div class="id-preview" onclick="viewID('${req.id_url}')">
-                ${req.id_url ? `<img src="${req.id_url}" alt="ID">` : `<i class="fas fa-image"></i>`}
+                ${req.id_url ? `<img src="${req.id_url}" alt="ID" onerror="this.onerror=null; this.parentElement.innerHTML='<i class=\'fas fa-exclamation-triangle\' style=\'color:orange\'></i><div class=\'id-label\'>ERR: PRIVATE</div>'">` : `<i class="fas fa-image"></i>`}
                 <div class="id-label">VIEW ID</div>
               </div>
               <div class="actions">
-                <button class="btn-approve" onclick="handleAction('${req.id}', 'Active')">Approve</button>
-                <button class="btn-reject" onclick="handleAction('${req.id}', 'Rejected')">Reject</button>
+                <button id="approve-${req.id}" class="btn-approve" onclick="handleAction('${req.id}', 'Active')">Approve</button>
+                <button id="reject-${req.id}" class="btn-reject" onclick="handleAction('${req.id}', 'Rejected')">Reject</button>
               </div>
             </div>
           `;
@@ -432,6 +435,11 @@
       const confirmMsg = newStatus === 'Active' ? 'Approve this account?' : 'Reject and disable this account?';
       if (!confirm(confirmMsg)) return;
 
+      const approveBtn = document.getElementById(`approve-${userId}`);
+      const rejectBtn = document.getElementById(`reject-${userId}`);
+      if (approveBtn) approveBtn.disabled = true;
+      if (rejectBtn) rejectBtn.disabled = true;
+
       try {
         const { error } = await supabase
           .from('profiles')
@@ -440,10 +448,12 @@
 
         if (error) throw error;
 
-        alert(newStatus === 'Active' ? 'Account approved!' : 'Account rejected.');
+        // Note: index.html has a monitor that will see this change via realtime
         fetchRequests();
       } catch (err) {
         alert('Action failed: ' + err.message);
+        if (approveBtn) approveBtn.disabled = false;
+        if (rejectBtn) rejectBtn.disabled = false;
       }
     }
 
