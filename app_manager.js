@@ -134,8 +134,9 @@ function renderTypes(filter = '') {
     if (!matchesTab) return false;
 
     if (!q) return true;
+    const keywords = q.split(/\s+/).filter(k => k.length > 0);
     const v = `${t.data.label} ${t.data.icon} ${t.data.color}`.toLowerCase();
-    return v.includes(q);
+    return keywords.every(k => v.includes(k));
   });
 
   if (list.length === 0) {

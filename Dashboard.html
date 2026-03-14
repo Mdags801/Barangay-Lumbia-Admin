@@ -448,11 +448,9 @@
         }
 
         const searchLower = searchQuery.toLowerCase();
-        const searchMatch = !searchQuery ||
-          (incident.incidentId || incident.id || '').toLowerCase().includes(searchLower) ||
-          (incident.type || '').toLowerCase().includes(searchLower) ||
-          (incident.location || '').toLowerCase().includes(searchLower) ||
-          (incident.description || '').toLowerCase().includes(searchLower);
+        const keywords = searchLower.split(/\s+/).filter(k => k.length > 0);
+        const combined = `${incident.incidentId || incident.id || ''} ${incident.type || ''} ${incident.location || ''} ${incident.description || ''} ${incident.reporter || ''}`.toLowerCase();
+        const searchMatch = keywords.length === 0 || keywords.every(k => combined.includes(k));
 
         return typeMatch && statusMatch && searchMatch;
       });

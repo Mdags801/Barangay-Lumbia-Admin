@@ -521,16 +521,21 @@
       userTableBody.innerHTML = '';
 
       let filtered = allProfiles.filter(user => {
-        const name = (user.full_name || user.name || '').toLowerCase();
-        const email = (user.email || '').toLowerCase();
         const role = (user.role || 'citizen').toLowerCase();
         const status = user.status || 'Active';
 
-        const matchesSearch = name.includes(searchTerm) || email.includes(searchTerm);
         const matchesRole = roleFilter === 'all' || role === roleFilter;
         const matchesStatus = statusFilter === 'all' || status === statusFilter;
 
-        return matchesSearch && matchesRole && matchesStatus;
+        if (!matchesRole || !matchesStatus) return false;
+
+        if (!searchTerm) return true;
+        const keywords = searchTerm.split(/\s+/).filter(k => k.length > 0);
+        const name = (user.full_name || user.name || '').toLowerCase();
+        const email = (user.email || '').toLowerCase();
+        const combined = `${name} ${email} ${role} ${status}`;
+
+        return keywords.every(k => combined.includes(k));
       });
 
       // Sort alpha

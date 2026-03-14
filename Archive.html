@@ -177,10 +177,11 @@
       const query = (searchInput.value || "").toLowerCase().trim();
       const sortBy = sortSelect.value;
 
+      const keywords = query.split(/\s+/).filter(k => k.length > 0);
       let list = archivedCache.filter(row => {
         const incident = row.data || row;
-        const searchStr = `${incident.incidentId} ${incident.incident_id} ${incident.type} ${incident.location} ${incident.reporter}`.toLowerCase();
-        return !query || searchStr.includes(query);
+        const searchStr = `${incident.incidentId} ${incident.incident_id} ${incident.type} ${incident.location} ${incident.reporter} ${incident.description || ''}`.toLowerCase();
+        return keywords.every(k => searchStr.includes(k));
       });
 
       // Sort

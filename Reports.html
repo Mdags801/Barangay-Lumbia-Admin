@@ -215,11 +215,15 @@
 
     // 2. Searching
     if (q) {
+      const keywords = q.split(/\s+/).filter(k => k.length > 0);
       list = list.filter(row => {
         const id = (row.incidentId || row.id || "").toString().toLowerCase();
         const type = (row.type || "").toString().toLowerCase();
         const location = (row.location || (row.coords?.lat && row.coords?.lng ? `${row.coords.lat}, ${row.coords.lng}` : "")).toString().toLowerCase();
-        return id.includes(q) || type.includes(q) || location.includes(q);
+        const reporter = (row.reporter || "").toString().toLowerCase();
+        const description = (row.description || "").toString().toLowerCase();
+        const combined = `${id} ${type} ${location} ${reporter} ${description}`;
+        return keywords.every(k => combined.includes(k));
       });
     }
 

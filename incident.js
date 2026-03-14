@@ -95,19 +95,19 @@ function getStatusClass(status) {
 
 function matchesSearch(data, id, q) {
   if (!q) return true;
-  q = q.toLowerCase();
+  const keywords = q.toLowerCase().split(/\s+/).filter(k => k.length > 0);
+  if (keywords.length === 0) return true;
+
   const visibleId = (data.incidentId || id || "").toString().toLowerCase();
-  const time = (data.reportedAt || data.time || "").toString().toLowerCase();
   const reporter = (data.reporter || "").toString().toLowerCase();
   const type = (data.type || "").toString().toLowerCase();
   const location = (data.location || (data.coords?.lat && data.coords?.lng ? `${data.coords.lat},${data.coords.lng}` : "")).toString().toLowerCase();
-  return (
-    visibleId.includes(q) ||
-    time.includes(q) ||
-    reporter.includes(q) ||
-    type.includes(q) ||
-    location.includes(q)
-  );
+  const description = (data.description || "").toString().toLowerCase();
+  
+  const combined = `${visibleId} ${reporter} ${type} ${location} ${description}`;
+
+  // Check if EVERY keyword is present somewhere in the combined string
+  return keywords.every(k => combined.includes(k));
 }
 
 function escapeHtml(str) {
