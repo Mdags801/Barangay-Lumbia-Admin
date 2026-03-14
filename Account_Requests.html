@@ -8,17 +8,60 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    .requests-container {
-      padding: 30px;
-      max-width: 1200px;
-      margin: 0 auto;
+    :root {
+      --primary: #1e40af;
+      --secondary: #64748b;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --bg: #f8fafc;
+      --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --hover-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
 
-    .page-header {
+    body {
+      background: var(--bg);
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 16px 24px 24px;
+      color: #1e293b;
+    }
+
+    /* Page header - matching Account_Management.html */
+    header.page-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 30px;
+      padding: 24px 32px;
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      border-radius: 16px;
+      color: white;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 24px;
+      animation: fadeInDown 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    header.page-header::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -10%;
+      width: 120%;
+      height: 200%;
+      background: radial-gradient(circle at top right, rgba(37, 99, 235, 0.12), transparent 40%);
+      pointer-events: none;
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .requests-container {
+      max-width: 1300px;
+      margin: 0 auto;
     }
 
     .request-card {
@@ -26,68 +69,98 @@
       border-radius: 16px;
       padding: 24px;
       margin-bottom: 20px;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      box-shadow: var(--card-shadow);
       display: grid;
       grid-template-columns: auto 1fr auto;
       gap: 24px;
       align-items: center;
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid #f1f5f9;
+      animation: fadeInUp 0.5s ease-out forwards;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .request-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      transform: translateY(-4px);
+      box-shadow: var(--hover-shadow);
+      border-color: #e2e8f0;
     }
 
     .user-avatar {
-      width: 60px;
-      height: 60px;
-      background: #f1f5f9;
-      border-radius: 50%;
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.5rem;
-      color: #64748b;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #475569;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
     }
 
     .user-info h3 {
       margin: 0 0 4px;
-      font-size: 1.1rem;
+      font-size: 1.15rem;
+      color: #0f172a;
+      font-weight: 600;
     }
 
     .user-info p {
       margin: 0;
       color: #64748b;
       font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .role-badge {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 12px;
-      font-size: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 0.72rem;
       font-weight: 700;
       text-transform: uppercase;
-      margin-top: 4px;
+      letter-spacing: 0.05em;
+      margin-top: 10px;
     }
 
-    .role-citizen { background: #e0f2fe; color: #0369a1; }
-    .role-responder { background: #fef3c7; color: #92400e; }
-    .role-staff { background: #f1f5f9; color: #475569; }
+    .role-citizen { background: #eff6ff; color: #1e40af; }
+    .role-responder { background: #fff7ed; color: #9a3412; }
+    .role-staff { background: #f8fafc; color: #475569; border: 1px solid #e2e8f0; }
+
+    .id-section {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
 
     .id-preview {
-      width: 120px;
-      height: 80px;
+      width: 140px;
+      height: 90px;
       background: #f8fafc;
-      border-radius: 8px;
-      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      border: 2px dashed #e2e8f0;
       cursor: pointer;
       overflow: hidden;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       position: relative;
+      transition: all 0.2s;
+    }
+
+    .id-preview:hover {
+      border-color: var(--primary);
+      background: #f1f5f9;
     }
 
     .id-preview img {
@@ -97,62 +170,92 @@
     }
 
     .id-preview i {
-      font-size: 1.5rem;
+      font-size: 1.6rem;
       color: #cbd5e1;
+      margin-bottom: 4px;
     }
 
     .id-label {
       position: absolute;
       bottom: 0;
       width: 100%;
-      background: rgba(0,0,0,0.5);
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(4px);
       color: white;
-      font-size: 0.6rem;
+      font-size: 0.65rem;
+      font-weight: 600;
       text-align: center;
-      padding: 2px 0;
+      padding: 4px 0;
+      letter-spacing: 0.05em;
     }
 
     .actions {
       display: flex;
-      gap: 12px;
+      flex-direction: column;
+      gap: 8px;
     }
 
     .btn-approve {
-      background: #10b981;
+      background: var(--success);
       color: white;
       border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
+      padding: 10px 24px;
+      border-radius: 10px;
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.2s;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+      box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);
     }
 
-    .btn-approve:hover { background: #059669; }
+    .btn-approve:hover {
+      background: #059669;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(16, 185, 129, 0.3);
+    }
 
     .btn-reject {
-      background: #ef4444;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
+      background: white;
+      color: var(--danger);
+      border: 1px solid #fee2e2;
+      padding: 9px 24px;
+      border-radius: 10px;
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.2s;
+      font-size: 0.9rem;
+      transition: all 0.2s;
     }
 
-    .btn-reject:hover { background: #dc2626; }
+    .btn-reject:hover {
+      background: #fef2f2;
+      border-color: #fecaca;
+    }
 
     .empty-state {
       text-align: center;
-      padding: 100px 20px;
-      color: #94a3b8;
+      padding: 120px 20px;
+      background: white;
+      border-radius: 24px;
+      border: 1px dashed #e2e8f0;
     }
 
     .empty-state i {
-      font-size: 4rem;
-      margin-bottom: 20px;
-      opacity: 0.3;
+      font-size: 4.5rem;
+      background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 24px;
+    }
+
+    .empty-state h2 {
+      margin: 0 0 8px;
+      color: #0f172a;
+    }
+
+    .empty-state p {
+      color: #64748b;
+      margin: 0;
     }
 
     /* Modal for ID preview */
@@ -162,42 +265,83 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0,0,0,0.9);
-      z-index: 1000;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(8px);
+      z-index: 10000;
       display: none;
       align-items: center;
       justify-content: center;
       padding: 40px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
 
     .id-viewer img {
-      max-width: 100%;
-      max-height: 100%;
-      border-radius: 12px;
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 16px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255,255,255,0.1);
     }
 
     .id-viewer-close {
       position: absolute;
-      top: 20px;
-      right: 20px;
+      top: 30px;
+      right: 30px;
+      width: 44px;
+      height: 44px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       color: white;
-      font-size: 2rem;
+      font-size: 1.5rem;
       cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .id-viewer-close:hover {
+      background: rgba(255,255,255,0.2);
+      transform: rotate(90deg);
+    }
+
+    .btn-refresh {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-refresh:hover {
+      background: rgba(255,255,255,0.2);
+      transform: scale(1.05);
     }
   </style>
 </head>
 <body style="background: #f8fafc;">
 
   <div class="requests-container">
-    <div class="page-header">
+    <header class="page-header">
       <div>
-        <h1 style="margin:0; font-size:1.8rem; color:#0f172a;">Account Requests</h1>
-        <p style="margin:4px 0 0; color:#64748b;">Review and verify new registrations from the apps and website.</p>
+        <h1 style="margin:0; font-size:1.8rem;">Account Requests</h1>
+        <p style="margin:4px 0 0; opacity: 0.8; font-size: 0.95rem;">Review and verify new registrations from the apps and website.</p>
       </div>
-      <button onclick="fetchRequests()" class="btn-ghost" style="padding: 8px 16px;">
-        <i class="fas fa-sync-alt"></i> Refresh
+      <button onclick="fetchRequests()" class="btn-refresh">
+        <i class="fas fa-sync-alt"></i> <span>Refresh List</span>
       </button>
-    </div>
+    </header>
 
     <div id="requestsList">
       <div style="text-align:center; padding:100px;">
