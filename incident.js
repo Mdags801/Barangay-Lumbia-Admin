@@ -270,20 +270,35 @@ function renderTable() {
     })();
 
     const visibleId = data.incidentId || id;
-    const locationText = data.location || (data.coords?.lat && data.coords?.lng ? `${data.coords.lat}, ${data.coords.lng}` : "N/A");
+    const isCoords = !data.location && (data.coords?.lat && data.coords?.lng);
+    const locationText = data.location || (isCoords ? `${Number(data.coords.lat).toFixed(4)}, ${Number(data.coords.lng).toFixed(4)}` : "N/A");
     const timeText = formatTime(data.reportedAt || data.time);
 
     const tr = document.createElement("tr");
     tr.setAttribute("role", "button");
     tr.setAttribute("tabindex", "0");
+    
+    // Unique ID for the location cell to update after geocoding
+    const locCellId = `loc-${id}-${Math.random().toString(36).substr(2, 5)}`;
+    
     tr.innerHTML = `
         <td class="type-cell">${icon} ${escapeHtml(data.type || "Unknown")}</td>
         <td>${escapeHtml(visibleId)}</td>
-        <td>${escapeHtml(locationText)}</td>
+        <td id="${locCellId}">${escapeHtml(locationText)}</td>
         <td>${escapeHtml(timeText)}</td>
         <td>${escapeHtml(data.reporter || "Anonymous")}</td>
         <td><span class="status ${getStatusClass(data.status)}">${escapeHtml(data.status || "Pending")}</span></td>
       `;
+
+    // If it's showing coordinates, resolve to street name automatically
+    if (isCoords) {
+      reverseGeocode(Number(data.coords.lat), Number(data.coords.lng)).then(address => {
+        if (address) {
+          const cell = document.getElementById(locCellId);
+          if (cell) cell.textContent = address;
+        }
+      });
+    }
 
     tr.addEventListener("click", () => openIncidentModal(data, id, icon));
     tr.addEventListener("keydown", (e) => {
