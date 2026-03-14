@@ -349,6 +349,16 @@
         <p>Fetching pending requests...</p>
       </div>
     </div>
+
+    <!-- Troubleshooting Section -->
+    <div style="margin-top: 60px; padding: 24px; background: #eef2ff; border-radius: 16px; border: 1px solid #e0e7ff;">
+      <h3 style="margin-top:0; color: #1e40af; font-size: 1rem;"><i class="fas fa-lightbulb"></i> Troubleshooting</h3>
+      <ul style="font-size: 0.85rem; color: #475569; line-height: 1.6; margin-bottom:0;">
+        <li><strong>Not seeing any requests?</strong> Ensure users are signing up with the correct app version.</li>
+        <li><strong>ID Images not loading?</strong> Make sure your <code>identities</code> storage bucket in Supabase is set to <strong>Public</strong>.</li>
+        <li><strong>RLS Policy:</strong> Ensure your <code>profiles</code> table has a policy allowing Admins to <code>SELECT</code> and <code>UPDATE</code> all rows.</li>
+      </ul>
+    </div>
   </div>
 
   <div id="idViewer" class="id-viewer" onclick="this.style.display='none'">
