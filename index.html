@@ -666,8 +666,25 @@
       console.log('[Alarm] Initializing Realtime listener for incidents...');
       supabase.channel('global_incidents')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'incidents' }, payload => {
-          console.log('[Alarm] SIGNAL RECEIVED:', payload.new);
-          alarmQueue.push(payload.new);
+          const incident = payload.new;
+          const reportedAt = incident.reportedAt || incident.time || incident.created_at;
+
+          // --- Alert Security Guard ---
+          // Only trigger the loud siren alarm if the incident was reported in the last 60 seconds.
+          // This prevents the alarm from going off when restoring old incidents from the archive.
+          if (reportedAt) {
+            const timeParsed = new Date(reportedAt).getTime();
+            if (!isNaN(timeParsed)) {
+              const diffMs = Date.now() - timeParsed;
+              if (diffMs > 60000) {
+                console.log('[Alarm] Skipping siren for old/restored incident:', incident.id);
+                return;
+              }
+            }
+          }
+
+          console.log('[Alarm] SIGNAL RECEIVED:', incident);
+          alarmQueue.push(incident);
           if (!isShowingAlarm) showNextAlarm();
         })
         .subscribe(status => {
