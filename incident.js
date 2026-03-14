@@ -335,7 +335,7 @@ function openIncidentModal(data, id, iconHtml) {
     <p><strong>Time:</strong> ${escapeHtml(timeText)}</p>
     <p><strong>Reporter:</strong> ${escapeHtml(data.reporter || "Anonymous")}</p>
     <p><strong>Description:</strong> ${escapeHtml(data.description || "No details")}</p>
-    ${data.coords?.lat && data.coords?.lng ? `<p style="font-size:.85rem;color:#94a3b8;"><strong>Coords:</strong> ${escapeHtml(data.coords.lat)}, ${escapeHtml(data.coords.lng)}</p>` : ""}
+    ${data.coords?.lat && data.coords?.lng ? `<p style="font-size:.85rem;color:#94a3b8;"><strong>Location:</strong> ${escapeHtml(data.coords.lat)}, ${escapeHtml(data.coords.lng)}</p>` : ""}
   `;
 
   // Kick off reverse geocoding immediately after rendering
@@ -690,6 +690,20 @@ if (resolveBtn) {
 if (archiveBtn) {
   archiveBtn.onclick = async () => {
     if (!currentDocId) return;
+
+    // --- Archive Security Gate ---
+    const incident = allIncidents.find(r => (r.id ?? r.incidentId) === currentDocId);
+    const status = (incident?.status || '').toLowerCase();
+    
+    if (status.includes('pend')) {
+        showCustomAlert({ title: 'Cannot Archive', text: 'This incident is still PENDING. Please resolve it first.', icon: 'exclamation-triangle', type: 'warning' });
+        return;
+    }
+    if (status.includes('enroute') || status.includes('ongoing') || status.includes('dispatch')) {
+        showCustomAlert({ title: 'Cannot Archive', text: 'This incident is currently ONGOING or DISPATCHED. It cannot be archived yet.', icon: 'exclamation-triangle', type: 'warning' });
+        return;
+    }
+
     const confirmed = await showConfirm({
       title: 'Archive Incident?',
       text: 'This will move the incident to permanent archives and remove it from the live list.',
