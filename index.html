@@ -806,13 +806,23 @@
       const searchInput = document.getElementById('presenceSearch');
       if (!badge || !countEl || !usersList) return;
 
-      // Robust extraction of users from state
       let rawUsers = [];
       try {
-        const state = (presenceChannel && typeof presenceChannel.presenceState === 'function') 
+        const currentState = (presenceChannel && typeof presenceChannel.presenceState === 'function') 
                        ? presenceChannel.presenceState() 
                        : {};
-        rawUsers = Object.values(state).flat().filter(u => u && (u.user_id || u.email || u.name));
+        
+        // Safely extract users without relying entirely on .flat() which might fail in older webviews
+        const valuesNode = Object.values(currentState);
+        valuesNode.forEach(arr => {
+          if (Array.isArray(arr)) {
+            arr.forEach(u => {
+              if (u && (u.user_id || u.email || u.name)) {
+                rawUsers.push(u);
+              }
+            });
+          }
+        });
       } catch (err) {
         console.warn('[Presence] State parsing warning:', err);
       }
@@ -983,7 +993,9 @@
         currentAuthSession = session;
         console.log('[Presence] Creating channel for:', session.user.id);
 
-        presenceChannel = supabase.channel('app_presence');
+        presenceChannel = supabase.channel('app_presence', {
+          config: { presence: { key: session.user.id } }
+        });
 
         presenceChannel
           .on('presence', { event: 'sync' }, () => {
