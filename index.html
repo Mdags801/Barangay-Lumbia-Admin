@@ -987,7 +987,15 @@
 
         presenceChannel
           .on('presence', { event: 'sync' }, () => {
+            const newState = presenceChannel.presenceState()
+            console.log('Synced state:', newState)
             renderActiveUsers();
+          })
+          .on('presence', { event: 'join', key: session.user.id }, ({ newPresences }) => {
+            console.log('User joined:', newPresences)
+          })
+          .on('presence', { event: 'leave', key: session.user.id }, ({ leftPresences }) => {
+            console.log('User left:', leftPresences)
           })
           .subscribe(async (status) => {
             console.log('[Presence] Channel status:', status);
