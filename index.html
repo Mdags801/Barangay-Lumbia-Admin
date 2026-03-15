@@ -983,9 +983,7 @@
         currentAuthSession = session;
         console.log('[Presence] Creating channel for:', session.user.id);
 
-        presenceChannel = supabase.channel('app_presence', {
-          config: { presence: { key: session.user.id } }
-        });
+        presenceChannel = supabase.channel('app_presence');
 
         presenceChannel
           .on('presence', { event: 'sync' }, () => {
