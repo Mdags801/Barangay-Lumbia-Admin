@@ -123,8 +123,8 @@ console.log('%c [System] Core Version 9.1 (Isolated & Stable) ', 'background: #1
       const meta = NAV_LINKS.find(l => l.page === page) || NAV_LINKS[0];
       const iframe = document.getElementById('main-iframe');
       if (iframe) {
-        // Force refresh for App Manager to avoid stale cache of UI updates
-        const url = meta.page === 'app_manager' ? `${meta.file}?t=${Date.now()}` : meta.file;
+        // Aggressive cache busting for all pages during transition
+        const url = `${meta.file}?v=${Date.now()}`;
         iframe.src = url;
       }
       setActiveNav(meta.page);
@@ -197,43 +197,42 @@ console.log('%c [System] Core Version 9.1 (Isolated & Stable) ', 'background: #1
       const presenceFab = document.getElementById('activeUsersBtn');
 
       if (user) {
-        // Fetch Profile for Role
-        const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+        // Show basic UI elements immediately to improve perceived speed
+        if (presenceFab) presenceFab.style.display = 'flex';
+        signInBtn.style.display = 'none';
+        signOutBtn.style.display = '';
+        userInfo.style.display = 'flex';
+        userInfo.style.alignItems = 'center';
+        userInfo.style.gap = '8px';
+
+        // Fetch Detail Profile in background
+        const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
         currentUserProfile = data || { role: 'staff', full_name: user.email.split('@')[0] };
 
         const role = (currentUserProfile.role || 'staff').toLowerCase();
         const status = (currentUserProfile.status || 'active').toLowerCase();
-
+        
         // Security Gate: Citizens, Responders, or Suspended/Pending users cannot access the portal
         if (role === 'citizen' || role === 'responder' || status === 'suspended' || status === 'pending') {
+          console.warn('[Security] Access denied for role:', role, 'status:', status);
           await supabase.auth.signOut();
           const errorType = (status === 'pending') ? 'pending_approval' : 'access_denied';
           
-          // Only redirect if NOT already on login.php to prevent loops
           if (!window.location.pathname.includes('login.php')) {
             window.location.href = `login.php?error=${errorType}`;
           }
           return;
         }
 
-        // Handle Role-based Visibility
-        applyRolePermissions(currentUserProfile.role);
+        applyRolePermissions(role);
 
-        userInfo.style.display = 'flex';
-        userInfo.style.alignItems = 'center';
-        userInfo.style.gap = '8px';
-
-        // Enhanced user info display
+        // Update display with real name if available
         userEmail.innerHTML = `
           <div style="display:flex; flex-direction:column; line-height:1.2;">
             <span style="font-weight:600;">${currentUserProfile.full_name || user.email}</span>
-            <span style="font-size:10px; text-transform:uppercase; color:var(--primary); font-weight:700;">${currentUserProfile.role}</span>
+            <span style="font-size:10px; text-transform:uppercase; color:var(--primary); font-weight:700;">${role}</span>
           </div>
         `;
-
-        signInBtn.style.display = 'none';
-        signOutBtn.style.display = '';
-        if (presenceFab) presenceFab.style.display = 'flex';
         
         if (!isSystemInitialized) {
           initPresenceSystem();
