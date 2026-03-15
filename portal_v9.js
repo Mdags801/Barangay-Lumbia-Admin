@@ -617,72 +617,14 @@ console.log('%c [System] Core Version 9.1 (Isolated & Stable) ', 'background: #1
 
 
     function renderActiveUsers(state) {
-      // Logic for rendering the user lists
       const badge = document.getElementById('activeUsersBadge');
       const countEl = document.getElementById('activeUsersCount');
       const usersList = document.getElementById('activeUsersList');
       const searchInput = document.getElementById('presenceSearch');
       if (!badge || !countEl || !usersList) return;
 
-      let rawUsers = [];
-      try {
-        const currentState = (presenceChannel && typeof presenceChannel.presenceState === 'function') 
-                       ? presenceChannel.presenceState() 
-                       : {};
-        
-        // Safely extract users without relying entirely on .flat() which might fail in older webviews
-        const valuesNode = Object.values(currentState);
-        valuesNode.forEach(arr => {
-          if (Array.isArray(arr)) {
-            arr.forEach(u => {
-              if (u && (u.user_id || u.email || u.name)) {
-                rawUsers.push(u);
-              }
-            });
-          }
-        });
-      } catch (err) {
-        console.warn('[Presence] State parsing warning:', err);
-      }
-      
-      // Deduplicate and merge with local data
-      const uniqueUsersMap = new Map();
-      rawUsers.forEach(u => {
-        const id = u.user_id || u.email || u.name;
-        if (!id) return;
-        if (!uniqueUsersMap.has(id)) {
-          uniqueUsersMap.set(id, u);
-        } else {
-          const existing = uniqueUsersMap.get(id);
-          const uTime = new Date(u.online_at || 0).getTime();
-          const eTime = new Date(existing.online_at || 0).getTime();
-          if (uTime > eTime) uniqueUsersMap.set(id, u);
-        }
-      });
-
-      // FORCED FALLBACK: If I'm logged in but not in the presence state (sync lag), add myself
-      if (currentAuthSession && currentAuthSession.user) {
-        const myId = currentAuthSession.user.id;
-        const myEmail = currentAuthSession.user.email;
-        if (!uniqueUsersMap.has(myId) && !uniqueUsersMap.has(myEmail)) {
-            // Only log once to avoid spamming
-            if (!window._presenceLastPatchTime || Date.now() - window._presenceLastPatchTime > 30000) {
-              console.log('%c [Presence v9] Local session lag detected, patching display... ', 'color: #f59e0b; font-weight: bold;');
-              window._presenceLastPatchTime = Date.now();
-            }
-           uniqueUsersMap.set(myId, {
-             user_id: myId,
-             email: myEmail,
-             name: currentUserProfile?.full_name || myEmail.split('@')[0],
-             role: currentUserProfile?.role || 'Admin',
-             status: 'Online',
-             online_at: new Date().toISOString(),
-             is_local_patch: true
-           });
-        }
-      }
-
-      const users = Array.from(uniqueUsersMap.values());
+      // Read from the broadcastUsers Map (populated by Broadcast API)
+      const users = Array.from(broadcastUsers.values());
       const count = users.length;
 
       // Update UI counts
@@ -799,6 +741,10 @@ console.log('%c [System] Core Version 9.1 (Isolated & Stable) ', 'background: #1
       }).join('');
     }
 
+    // Broadcast-based online users map (userId → presenceData)
+    const broadcastUsers = new Map();
+    let heartbeatInterval = null;
+
     async function startPresenceTracking() {
       if (isPresenceStarting || presenceChannel) return;
       isPresenceStarting = true;
@@ -813,79 +759,96 @@ console.log('%c [System] Core Version 9.1 (Isolated & Stable) ', 'background: #1
         currentAuthSession = session;
         console.log('[Presence v9] Joining as:', session.user.id);
 
-        // Channel with broadcast and presence explicitly enabled (Supabase v2 docs)
-        presenceChannel = supabase.channel('app_presence_v9', {
-          config: {
-            broadcast: { self: true },
-            presence:  { key: session.user.id }
-          }
+        if (!currentUserProfile) {
+          const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+          if (profile) currentUserProfile = profile;
+        }
+
+        const myData = {
+          user_id: session.user.id,
+          email:   session.user.email,
+          name:    currentUserProfile?.full_name || session.user.email.split('@')[0],
+          role:    currentUserProfile?.role || 'Admin',
+          status:  'Online',
+          online_at: new Date().toISOString(),
+          platform: 'Web Portal'
+        };
+
+        // Add myself immediately (optimistic UI)
+        broadcastUsers.set(myData.user_id, { ...myData, is_me: true });
+        renderActiveUsers();
+
+        // Use Broadcast channel (simpler & more reliable than Presence API)
+        presenceChannel = supabase.channel('app_broadcast_v1', {
+          config: { broadcast: { self: false } }
         });
 
-        const updateStatus = (status, error) => {
-          console.log(`[Presence] Status: ${status}`, error || '');
+        const updateStatus = (status) => {
+          console.log(`[Presence] Status: ${status}`);
           const statusIcon = document.getElementById('presenceStatusIcon');
           const statusText = document.getElementById('presenceStatusText');
           if (statusIcon && statusText) {
             if (status === 'SUBSCRIBED') {
               statusIcon.style.color = '#10b981';
               statusText.textContent = 'Live Sync Active';
-            } else if (status === 'CLOSED') {
+            } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
               statusIcon.style.color = '#ef4444';
-              statusText.textContent = 'Connection Closed';
+              statusText.textContent = 'Connection Issue';
             } else {
               statusIcon.style.color = '#f59e0b';
-              statusText.textContent = `Connecting (${status})...`;
+              statusText.textContent = `Connecting...`;
             }
           }
         };
 
         presenceChannel
-          .on('presence', { event: 'sync' }, () => {
-            const state = presenceChannel.presenceState();
-            const count = Object.keys(state).length;
-            console.log(`[Presence] Sync — ${count} users online:`, Object.keys(state));
+          // Someone came online
+          .on('broadcast', { event: 'user_online' }, ({ payload }) => {
+            if (!payload?.user_id) return;
+            console.log('[Broadcast] ✅ User online:', payload.name, payload.user_id);
+            broadcastUsers.set(payload.user_id, payload);
+            // Reply with our own data so the newcomer sees us too
+            presenceChannel.send({ type: 'broadcast', event: 'user_online', payload: myData });
             renderActiveUsers();
           })
-          .on('presence', { event: 'join' }, ({ key, newPresences }) => {
-            console.log('[Presence] ✅ User Joined:', key, newPresences);
-            renderActiveUsers();
-          })
-          .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
-            console.log('[Presence] ❌ User Left:', key, leftPresences);
+          // Someone went offline
+          .on('broadcast', { event: 'user_offline' }, ({ payload }) => {
+            if (!payload?.user_id) return;
+            console.log('[Broadcast] ❌ User offline:', payload.user_id);
+            broadcastUsers.delete(payload.user_id);
             renderActiveUsers();
           })
           .subscribe(async (status) => {
             updateStatus(status);
-            
             if (status === 'SUBSCRIBED') {
-              // Get current identity
-              if (!currentUserProfile) {
-                const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
-                if (profile) currentUserProfile = profile;
-              }
+              // Announce ourselves to the channel
+              console.log('%c [Presence] Broadcasting self: ' + myData.name, 'color: #10b981; font-weight: bold;');
+              await presenceChannel.send({ type: 'broadcast', event: 'user_online', payload: myData });
 
-              const presenceData = {
-                user_id: session.user.id,
-                email: session.user.email,
-                name: currentUserProfile?.full_name || session.user.email.split('@')[0],
-                role: currentUserProfile?.role || 'Admin',
-                status: 'Online',
-                online_at: new Date().toISOString(),
-                platform: 'Web Portal'
-              };
+              // Heartbeat: re-announce every 30s so others see us stay online
+              heartbeatInterval = setInterval(async () => {
+                await presenceChannel.send({
+                  type: 'broadcast',
+                  event: 'user_online',
+                  payload: { ...myData, online_at: new Date().toISOString() }
+                });
+              }, 30000);
 
-              console.log('%c [Presence] Tracking self: ' + presenceData.name, 'color: #10b981; font-weight: bold;');
-              const trackResult = await presenceChannel.track(presenceData);
-              if (trackResult !== 'ok') {
-                console.warn('[Presence] Track failed:', trackResult);
-              }
+              // Announce offline when the tab closes
+              window.addEventListener('beforeunload', async () => {
+                await presenceChannel.send({ type: 'broadcast', event: 'user_offline', payload: { user_id: myData.user_id } });
+              });
             }
           });
+
       } catch (err) {
         console.error('[Presence] Start error:', err);
         isPresenceStarting = false;
       }
     }
+
+
+
 
     function initPresenceSystem() {
       if (!presenceUIInitialized) {
