@@ -999,35 +999,41 @@
 
         presenceChannel
           .on('presence', { event: 'sync' }, () => {
-            const newState = presenceChannel.presenceState()
-            console.log('Synced state:', newState)
+            const newState = presenceChannel.presenceState();
+            console.log('Synced state:', newState);
             renderActiveUsers();
           })
-          .on('presence', { event: 'join', key: session.user.id }, ({ newPresences }) => {
-            console.log('User joined:', newPresences)
+          .on('presence', { event: 'join' }, ({ newPresences }) => {
+            console.log('User joined:', newPresences);
+            renderActiveUsers();
           })
-          .on('presence', { event: 'leave', key: session.user.id }, ({ leftPresences }) => {
-            console.log('User left:', leftPresences)
+          .on('presence', { event: 'leave' }, ({ leftPresences }) => {
+            console.log('User left:', leftPresences);
+            renderActiveUsers();
           })
           .subscribe(async (status) => {
             console.log('[Presence] Channel status:', status);
             if (status === 'SUBSCRIBED') {
-              // Fetch latest profile for tracking
-              const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
-              if (profile) currentUserProfile = profile;
+              try {
+                // Fetch latest profile for tracking - use maybeSingle so it doesn't throw if not found
+                const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+                if (profile) currentUserProfile = profile;
 
-              const presenceData = {
-                user_id: session.user.id,
-                email: session.user.email,
-                name: currentUserProfile?.full_name || session.user.email.split('@')[0],
-                role: currentUserProfile?.role || 'Admin',
-                status: 'Online',
-                online_at: new Date().toISOString(),
-                platform: 'Web Portal'
-              };
+                const presenceData = {
+                  user_id: session.user.id,
+                  email: session.user.email,
+                  name: currentUserProfile?.full_name || session.user.email.split('@')[0],
+                  role: currentUserProfile?.role || 'Admin',
+                  status: 'Online',
+                  online_at: new Date().toISOString(),
+                  platform: 'Web Portal'
+                };
 
-              console.log('[Presence] Tracking:', presenceData);
-              await presenceChannel.track(presenceData);
+                console.log('[Presence] Tracking:', presenceData);
+                await presenceChannel.track(presenceData);
+              } catch (trackErr) {
+                console.error('[Presence] Error during tracking setup:', trackErr);
+              }
             }
             if (status === 'CHANNEL_ERROR' || status === 'CLOSED') {
                _presenceJoinPending = false;
