@@ -1,4 +1,4 @@
-/* portal_v9.js — Version 9.0 (Stability & Cache-Force Build) */
+/* portal_v9.js — Version 9.0 (Isolated & Secure) - Sync: 2026-03-15 23:42 */
 console.log('%c [System] Core Version 9.0 (Isolated & Stable) ', 'background: #1e3a8a; color: #fff; padding: 6px; border-radius: 4px; font-weight: bold; font-size: 14px;');
 
 // --- Supabase Initialization ---
