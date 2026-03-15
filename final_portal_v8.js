@@ -1,5 +1,5 @@
-/* core_v7.js — Version 7.0 (Final Deployment) */
-console.log('%c [System] Core Version 7.0 (Verified Sync) ', 'background: #0d47a1; color: #fff; padding: 4px; border-radius: 4px; font-weight: bold;');
+/* final_portal_v8.js — Version 8.0 (Security & Performance Build) */
+console.log('%c [System] Core Version 8.0 (Live & Secure) ', 'background: #b71c1c; color: #fff; padding: 6px; border-radius: 4px; font-weight: bold; font-size: 14px;');
 
 // --- Supabase Initialization ---
     const SUPABASE_URL = 'https://tukkkwtxuaxrbihyammp.supabase.co';

@@ -222,7 +222,7 @@
     </div>
 
 
-    <script src="incident.js"></script>
+    <script src="incident.js?v=<?php echo time(); ?>"></script>
 </body>
 
 </html>

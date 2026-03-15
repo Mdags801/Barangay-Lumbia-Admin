@@ -1,12 +1,4 @@
-<?php 
-require_once __DIR__ . '/session_guard.php'; 
-
-// Forced cleanup: If user is landing on the wrong file name or extension
-if (basename($_SERVER['PHP_SELF']) !== 'index.php') {
-    header('Location: index.php');
-    exit;
-}
-?>
+<?php require_once __DIR__ . '/session_guard.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -17,6 +9,7 @@ if (basename($_SERVER['PHP_SELF']) !== 'index.php') {
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>Barangay Admin Portal</title>
   <!-- Google Fonts for modern typography -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
@@ -30,8 +23,8 @@ if (basename($_SERVER['PHP_SELF']) !== 'index.php') {
   <link rel="stylesheet" href="global.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/svgs/solid/shield-halved.svg">
+  <!-- Favicon (Data URI to prevent 404) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
 </head>
 
 <body>
@@ -148,8 +141,8 @@ if (basename($_SERVER['PHP_SELF']) !== 'index.php') {
 
 
 
-  <!-- System Core (v7.0 - Final Sync) -->
-  <script src="core_v7.js?v=<?php echo time(); ?>"></script>
+  <!-- System Core (v8.0 - Nuclear Refresh) -->
+  <script src="final_portal_v8.js?cache=<?php echo bin2hex(random_bytes(8)); ?>"></script>
 
   <!-- ===== ACTIVE USERS FLOATING BUTTON ===== -->
   <button id="activeUsersBtn" class="active-users-fab" aria-label="Show active users" title="Active Users">

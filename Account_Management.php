@@ -122,7 +122,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="account_management.js" defer></script>
+  <script src="account_management.js?v=<?php echo time(); ?>" defer></script>
 </body>
 
 </html>

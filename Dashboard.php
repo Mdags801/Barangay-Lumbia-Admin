@@ -165,7 +165,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="dashboard.js" defer></script>
+  <script src="dashboard.js?v=<?php echo time(); ?>" defer></script>
   </body>
 
 </html>
