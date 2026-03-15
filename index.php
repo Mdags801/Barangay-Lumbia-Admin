@@ -135,8 +135,8 @@
 
 
 
-  <!-- Main Script -->
-  <script src="index.js?v=2"></script>
+  <!-- Main Script (Renamed to force cache refresh) -->
+  <script src="main_portal.js?v=2.1"></script>
 
   <!-- ===== ACTIVE USERS FLOATING BUTTON ===== -->
   <button id="activeUsersBtn" class="active-users-fab" aria-label="Show active users" title="Active Users">
