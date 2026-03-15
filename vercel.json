@@ -3,7 +3,11 @@
   "trailingSlash": false,
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/",
+      "destination": "/index.php"
+    },
+    {
+      "source": "/((?!api/).*)",
       "destination": "/$1.php"
     }
   ],
