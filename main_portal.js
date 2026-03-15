@@ -823,10 +823,15 @@
           fab.onclick = () => { 
             drawer.classList.add('open'); 
             overlay.classList.add('open'); 
+            drawer.setAttribute('aria-hidden', 'false');
             // Force a render when opening to ensure local user shows up
             renderActiveUsers(); 
           };
-          closeBtn.onclick = overlay.onclick = () => { drawer.classList.remove('open'); overlay.classList.remove('open'); };
+          closeBtn.onclick = overlay.onclick = () => { 
+            drawer.classList.remove('open'); 
+            overlay.classList.remove('open'); 
+            drawer.setAttribute('aria-hidden', 'true');
+          };
           
           if (searchInput) {
             searchInput.oninput = () => {

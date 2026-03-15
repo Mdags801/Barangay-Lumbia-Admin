@@ -135,8 +135,8 @@
 
 
 
-  <!-- Main Script (Renamed to force cache refresh) -->
-  <script src="main_portal.js?v=2.1"></script>
+  <!-- Main Script (Version 3) -->
+  <script src="main_portal.js?v=3"></script>
 
   <!-- ===== ACTIVE USERS FLOATING BUTTON ===== -->
   <button id="activeUsersBtn" class="active-users-fab" aria-label="Show active users" title="Active Users">
@@ -145,7 +145,7 @@
   </button>
 
   <!-- ===== ACTIVE USERS DRAWER ===== -->
-  <div id="activeUsersDrawer" class="active-drawer" aria-hidden="true" role="dialog" aria-label="Active users">
+  <div id="activeUsersDrawer" class="active-drawer" aria-hidden="false" role="dialog" aria-label="Active users">
     <div class="active-drawer-header">
       <div class="active-drawer-title">
         <span class="live-dot-pulse"></span>
