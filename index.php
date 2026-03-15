@@ -1,4 +1,12 @@
-<?php require_once __DIR__ . '/session_guard.php'; ?>
+<?php 
+require_once __DIR__ . '/session_guard.php'; 
+
+// Forced cleanup: If user is landing on the wrong file name or extension
+if (basename($_SERVER['PHP_SELF']) !== 'index.php') {
+    header('Location: index.php');
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -140,8 +148,8 @@
 
 
 
-  <!-- System Core (v6.0 - Mandatory Refresh) -->
-  <script src="portal_v6.js?v=<?php echo time(); ?>"></script>
+  <!-- System Core (v7.0 - Final Sync) -->
+  <script src="core_v7.js?v=<?php echo time(); ?>"></script>
 
   <!-- ===== ACTIVE USERS FLOATING BUTTON ===== -->
   <button id="activeUsersBtn" class="active-users-fab" aria-label="Show active users" title="Active Users">

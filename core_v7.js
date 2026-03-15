@@ -1,5 +1,5 @@
-/* portal_v6.js — Version 6.0 (Aggressive Sync Build) */
-console.log('%c [System] Core Version 6.0 (Sync Active) ', 'background: #004d40; color: #fff; padding: 4px; border-radius: 4px; font-weight: bold;');
+/* core_v7.js — Version 7.0 (Final Deployment) */
+console.log('%c [System] Core Version 7.0 (Verified Sync) ', 'background: #0d47a1; color: #fff; padding: 4px; border-radius: 4px; font-weight: bold;');
 
 // --- Supabase Initialization ---
     const SUPABASE_URL = 'https://tukkkwtxuaxrbihyammp.supabase.co';
