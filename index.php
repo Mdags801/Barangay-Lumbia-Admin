@@ -6,6 +6,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="google-site-verification" content="1mr7y1ebeS_hMMdy0HnzeZaQR2RQA_xGs28q91IXtPE" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>Barangay Admin Portal</title>
   <!-- Google Fonts for modern typography -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
@@ -20,7 +23,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <!-- Favicon -->
-  <link rel="icon" type="image/x-icon" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/svgs/solid/shield-halved.svg">
+  <link rel="icon" type="image/svg+xml" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/svgs/solid/shield-halved.svg">
 </head>
 
 <body>
@@ -137,8 +140,8 @@
 
 
 
-  <!-- System Core (v5.0 Stable) -->
-  <script src="system_core.js?v=5.0"></script>
+  <!-- System Core (v6.0 - Mandatory Refresh) -->
+  <script src="portal_v6.js?v=<?php echo time(); ?>"></script>
 
   <!-- ===== ACTIVE USERS FLOATING BUTTON ===== -->
   <button id="activeUsersBtn" class="active-users-fab" aria-label="Show active users" title="Active Users">
@@ -147,7 +150,7 @@
   </button>
 
   <!-- ===== ACTIVE USERS DRAWER ===== -->
-  <div id="activeUsersDrawer" class="active-drawer" role="dialog" aria-label="Active users" aria-hidden="false" style="visibility: hidden;">
+  <div id="activeUsersDrawer" class="active-drawer" role="dialog" aria-label="Active users" style="visibility: hidden;">
     <div class="active-drawer-header">
       <div class="active-drawer-title">
         <span class="live-dot-pulse"></span>
