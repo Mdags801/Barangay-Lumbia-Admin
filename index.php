@@ -1,3 +1,4 @@
+<?php require_once __DIR__ . '/session_guard.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -113,7 +114,7 @@
       </header>
       <!-- Iframe Content -->
       <main>
-        <iframe id="main-iframe" class="main-iframe" title="Main Content" src="Dashboard.html" tabindex="0"
+        <iframe id="main-iframe" class="main-iframe" title="Main Content" src="Dashboard.php" tabindex="0"
           aria-label="Main Content Area"></iframe>
       </main>
     </div>
@@ -256,49 +257,49 @@
       {
         id: 'nav-dashboard',
         page: 'dashboard',
-        file: 'Dashboard.html',
+        file: 'Dashboard.php',
         title: 'Dashboard',
         subtitle: 'Overview & quick stats'
       },
       {
         id: 'nav-incident',
         page: 'incident',
-        file: 'Incident.html',
+        file: 'Incident.php',
         title: 'Incident',
         subtitle: 'Incident reporting & management'
       },
       {
         id: 'nav-reports',
         page: 'reports',
-        file: 'Reports.html',
+        file: 'Reports.php',
         title: 'Reports',
         subtitle: 'View and generate reports'
       },
       {
         id: 'nav-account',
         page: 'account',
-        file: 'Account_Management.html',
+        file: 'Account_Management.php',
         title: 'Account Management',
         subtitle: 'Manage user accounts and roles'
       },
       {
         id: 'nav-app_manager',
         page: 'app_manager',
-        file: 'App_Manager.html',
+        file: 'App_Manager.php',
         title: 'App Manager',
         subtitle: 'Manage barangay applications'
       },
       {
         id: 'nav-requests',
         page: 'requests',
-        file: 'Account_Requests.html',
+        file: 'Account_Requests.php',
         title: 'Account Requests',
         subtitle: 'Approve or verify new registrations'
       },
       {
         id: 'nav-archive',
         page: 'archive',
-        file: 'Archive.html',
+        file: 'Archive.php',
         title: 'Archive',
         subtitle: 'Access archived records'
       }
@@ -436,7 +437,7 @@
         // Security Gate: Citizens and Responders cannot access the website
         if (role === 'citizen' || role === 'responder') {
           await supabase.auth.signOut();
-          window.location.href = 'login.html?error=access_denied';
+          window.location.href = 'login.php?error=access_denied';
           return;
         }
 
@@ -512,7 +513,7 @@
 
     // --- Sign In / Sign Out Flows ---
     document.getElementById('sign-in-btn').addEventListener('click', async function () {
-      window.location.href = 'login.html';
+        window.location.href = 'login.php';
     });
 
     const logoutModal = document.getElementById('logoutModal');
@@ -527,8 +528,10 @@
 
     document.getElementById('confirmLogout').addEventListener('click', async function () {
       try {
-        await supabase.auth.signOut();
-        window.location.href = 'login.html';
+        // Destroy the server-side PHP session
+        const res = await fetch('api/logout.php', { method: 'POST' });
+        const data = await res.json();
+        window.location.href = data.redirect || 'login.php';
       } catch (err) {
         showToast('Sign out failed. Please try again.', 'danger');
       }
@@ -734,7 +737,7 @@
     supabase.auth.onAuthStateChange((_event, session) => {
       updateAuthUI(session?.user || null);
       if (!session || !session.user) {
-        window.location.href = 'login.html';
+        window.location.href = 'login.php';
       }
     });
 

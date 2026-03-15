@@ -15,7 +15,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ---------- Optional Auth Guard (disabled for debugging) ----------
 (async function guard() {
-  const redirectIfNoSession = false; // set true to re-enable redirect to login.html
+  const redirectIfNoSession = false; // set true to re-enable redirect to login.php
   try {
     const { data, error } = await supabaseClient.auth.getSession();
     if (error) {
@@ -26,7 +26,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     if (!session || !session.user) {
       console.log("No session found.");
       if (redirectIfNoSession) {
-        window.location.href = 'login.html';
+        window.location.href = 'login.php';
         return;
       }
     } else {
@@ -36,7 +36,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     }
   } catch (err) {
     console.warn("Auth guard error:", err);
-    if (redirectIfNoSession) window.location.href = 'login.html';
+    if (redirectIfNoSession) window.location.href = 'login.php';
   }
 })();
 
@@ -531,7 +531,7 @@ function subscribeRealtime() {
         if (ev === 'INSERT') {
           const row = { id: newRow.id ?? newRow.incidentId ?? null, ...newRow };
           allIncidents.unshift(row);
-          // Alarm is now handled globally by index.html
+          // Alarm is now handled globally by index.php
         } else if (ev === 'UPDATE') {
           const id = newRow.id ?? newRow.incidentId ?? null;
           const idx = allIncidents.findIndex(r => (r.id ?? r.incidentId) === id);

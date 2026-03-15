@@ -112,17 +112,11 @@
           </div>
 
           <div class="field">
-            <label for="suPassword">Password</label>
-            <input id="suPassword" name="password" type="password" autocomplete="new-password"
-              placeholder="Choose a strong password" required />
+            <label for="suConfirm" id="otpLabel" style="display:none;">6-Digit Verification Code</label>
+            <input id="suConfirm" name="otpCode" type="text" autocomplete="one-time-code" placeholder="Enter code sent to email" style="display:none;" />
           </div>
 
-          <div class="field">
-            <label for="suConfirm">Confirm Password</label>
-            <input id="suConfirm" name="confirm_password" type="password" placeholder="Repeat password" required />
-          </div>
-
-          <div class="field" style="margin-top: 20px; border: 1px dashed #cbd5e1; padding: 16px; border-radius: 12px; background: #f8fafc;">
+          <div class="field" id="idUploadContainer" style="margin-top: 20px; border: 1px dashed #cbd5e1; padding: 16px; border-radius: 12px; background: #f8fafc;">
             <label for="suID" style="display:flex; align-items:center; gap:8px; cursor:pointer; color:var(--primary); font-weight:600;">
               <i class="fas fa-id-card"></i> Upload National ID / Residency Proof
             </label>
@@ -131,7 +125,7 @@
           </div>
 
           <div class="actions">
-            <button id="createBtn" class="btn-primary" type="submit">Create account</button>
+            <button id="createBtn" class="btn-primary" type="submit">Verify Email & Create Account</button>
             <button id="backLogin" class="btn-ghost" type="button">Back to login</button>
           </div>
         </form>
@@ -205,7 +199,7 @@
     if (backLogin) {
       backLogin.addEventListener('click', (e) => {
         e.preventDefault();
-        window.location.href = '/login.html'; // adjust path if needed
+        window.location.href = '/login.php'; // adjust path if needed
       });
     }
 
@@ -251,7 +245,7 @@
         const { data: { session } } = await supabase.auth.getSession();
         if (session && session.user) {
           console.log('[signup] Active session found, redirecting to portal...');
-          window.location.href = 'index.html';
+          window.location.href = 'index.php';
         }
       }
       checkActiveSession();
@@ -264,17 +258,23 @@
       }
       form.removeEventListener('submit', handleSignup);
       form.addEventListener('submit', handleSignup);
+      let isCodeSent = false;
 
       async function handleSignup(event) {
         event.preventDefault();
         showMsg('', '');
 
+        const fullName = form.elements['fullName']?.value?.trim();
         const email = form.elements['email']?.value?.trim();
-        const password = form.elements['password']?.value || '';
-        const confirmPassword = form.elements['confirm_password']?.value || '';
         const idFile = form.elements['id_file']?.files[0];
+        const otpCode = form.elements['otpCode']?.value?.trim();
         const submitBtn = form.querySelector('[type="submit"]');
 
+        if (!fullName) {
+          showMsg('Please enter your full name.', 'error');
+          form.elements['fullName']?.focus();
+          return;
+        }
         if (!email) {
           showMsg('Please enter your email address.', 'error');
           form.elements['email']?.focus();
@@ -285,49 +285,78 @@
           form.elements['email']?.focus();
           return;
         }
-        if (!password) {
-          showMsg('Please enter a password.', 'error');
-          form.elements['password']?.focus();
-          return;
-        }
-        if (!isValidPassword(password)) {
-          showMsg('Password must be at least 8 characters.', 'error');
-          form.elements['password']?.focus();
-          return;
-        }
-        if (password !== confirmPassword) {
-          showMsg('Passwords do not match.', 'error');
-          form.elements['confirm_password']?.focus();
-          return;
-        }
         if (!idFile) {
           showMsg('Please upload a copy of your ID for verification.', 'error');
           return;
         }
 
-        await withButtonLoading(submitBtn, async () => {
-          showMsg('Signing up...', 'info');
-          console.log('[Supabase] Attempting signUp for:', email);
+        if (!isCodeSent) {
+          // STEP 1: Send OTP
+          await withButtonLoading(submitBtn, async () => {
+             console.log('[Supabase] Requesting OTP for signup:', email);
+             const { error } = await supabase.auth.signInWithOtp({ 
+                email, 
+                options: { shouldCreateUser: true } 
+             });
 
+             if (error) {
+               showMsg(error.message || 'Failed to send verification code. Please try again.', 'error');
+               return;
+             }
+
+             // Successfully sent
+             showMsg('A 6-digit verification code has been sent to your email.', 'success');
+             isCodeSent = true;
+             
+             // Update UI to ask for code
+             form.elements['fullName'].disabled = true;
+             form.elements['email'].disabled = true;
+             document.getElementById('idUploadContainer').style.display = 'none';
+
+             const otpInput = form.elements['otpCode'];
+             const otpLabel = document.getElementById('otpLabel');
+             otpInput.style.display = 'block';
+             otpLabel.style.display = 'block';
+             otpInput.required = true;
+             submitBtn.textContent = 'Verify Code & Complete Registration';
+             otpInput.focus();
+          });
+          return;
+        }
+
+        // STEP 2: Verify OTP and Complete Profile
+        if (!otpCode) {
+          showMsg('Please enter the 6-digit verification code.', 'error');
+          form.elements['otpCode']?.focus();
+          return;
+        }
+
+        await withButtonLoading(submitBtn, async () => {
+          showMsg('Verifying your code...', 'info');
+          
           try {
-            const { data, error } = await supabase.auth.signUp({ email, password });
-            console.log('[Supabase] signUp response:', data, error);
+            const { data, error } = await supabase.auth.verifyOtp({
+              email,
+              token: otpCode,
+              type: 'email'
+            });
 
             if (error) {
-              showMsg(error.message || 'Signup failed. Please try again.', 'error');
-              showToast && showToast(error.message || 'Signup failed.', 'error');
+              showMsg(error.message || 'Invalid code. Please try again.', 'error');
               return;
             }
 
             if (data?.user) {
-              // 1. Upload ID Image
+              showMsg('Code verified! Processing your account details...', 'info');
+
+              // 1. Upload ID Image (Since we are now verified config session allows upload)
               let idUrl = null;
               try {
                 const fileExt = idFile.name.split('.').pop();
                 const fileName = `${data.user.id}-${Math.random().toString(36).substring(2)}.${fileExt}`;
                 const filePath = `identities/${fileName}`;
 
-                const { data: uploadData, error: uploadError } = await supabase.storage
+                const { error: uploadError } = await supabase.storage
                   .from('identities')
                   .upload(filePath, idFile);
 
@@ -343,14 +372,13 @@
               }
 
               // 2. INSERT INTO PROFILES TABLE
-              const fullName = form.elements['fullName']?.value?.trim() || 'User';
               const { error: profileError } = await supabase
                 .from('profiles')
                 .upsert({
                   id: data.user.id,
                   full_name: fullName,
                   email: email,
-                  role: 'staff', // Default role for website signups
+                  role: 'staff', // Default role for Admin internal requests
                   status: 'Pending',
                   id_url: idUrl
                 });
@@ -359,41 +387,19 @@
                 console.error('[Supabase] Profile creation failed:', profileError);
               }
 
-              if (Array.isArray(data.user.identities) && data.user.identities.length === 0) {
-                // Fetch the role to show in the modal
-                const { data: existingProfile } = await supabase
-                  .from('profiles')
-                  .select('role')
-                  .eq('email', email)
-                  .single();
+              // Since they are technically logged in now, but pending approval, we sign them out immediately
+              await supabase.auth.signOut();
 
-                const roleName = existingProfile?.role || 'User';
+              showMsg('Verification successful! Your account request has been submitted to the Barangay Admin.', 'success');
+              if (window.showToast) showToast('Request submitted! Please wait for approval.', 'success');
+              
+              setTimeout(() => {
+                window.location.href = 'login.php';
+              }, 2500);
 
-                showAlreadyRegisteredModal(email, roleName);
-              } else {
-                showMsg('Verification successful! Your account request has been submitted to the Barangay Admin. Please wait for approval.', 'success');
-                showToast && showToast('Request submitted! Check your email.', 'success');
-              }
             } else {
               showMsg('Signup request completed. Please check your email.', 'info');
             }
-
-            try {
-              const msg = { type: 'signup-success', email };
-              if (window.opener && !window.opener.closed) {
-                window.opener.postMessage(msg, '*');
-                console.log('[Supabase] postMessage sent to opener');
-              } else if (window.parent && window.parent !== window) {
-                window.parent.postMessage(msg, '*');
-                console.log('[Supabase] postMessage sent to parent');
-              }
-            } catch (pmErr) {
-              console.warn('[Supabase] postMessage failed:', pmErr);
-            }
-
-            setTimeout(() => {
-              window.location.href = 'login.html';
-            }, 1500);
 
           } catch (err) {
             console.error('[Supabase] signUp exception:', err);
@@ -441,7 +447,7 @@
       <h2 id="alertTitle" style="margin:0 0 8px; font-size:1.5rem;">Notification</h2>
       <p id="alertText" style="color:#64748b; margin:0; line-height:1.5;">Message content goes here.</p>
       <div class="modal-actions-custom" style="justify-content:center; margin-top:24px;">
-        <button class="btn-confirm" onclick="window.location.href='login.html'" style="max-width:200px;">Go to
+        <button class="btn-confirm" onclick="window.location.href='login.php'" style="max-width:200px;">Go to
           Login</button>
       </div>
     </div>

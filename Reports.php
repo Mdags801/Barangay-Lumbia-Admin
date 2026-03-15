@@ -509,7 +509,7 @@
     if (window.parent && window.parent.openGlobalIncidentModal) {
       window.parent.openGlobalIncidentModal(id);
     } else {
-      window.location.href = "incident.html?id=" + encodeURIComponent(id);
+      window.location.href = "incident.php?id=" + encodeURIComponent(id);
     }
   }
 

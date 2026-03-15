@@ -59,7 +59,7 @@
     <main class="auth-shell">
         <div class="auth-card">
             <section class="auth-form">
-                <a href="login.html" class="back-link">
+                <a href="login.php" class="back-link">
                     <i class="fas fa-arrow-left"></i> Back to Login
                 </a>
 
@@ -106,7 +106,7 @@
                     <p id="successMessage" style="color:#64748b; margin-top:8px;">We've sent a password reset link to
                         your email address.</p>
                     <div class="actions" style="margin-top:24px;">
-                        <button onclick="window.location.href='login.html'" class="btn-ghost" style="width:100%">Return
+                        <button onclick="window.location.href='login.php'" class="btn-ghost" style="width:100%">Return
                             to Login</button>
                     </div>
                 </div>
