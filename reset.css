@@ -1,0 +1,23 @@
+/* reset.css — Styles specific to the reset password page */
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #64748b;
+  text-decoration: none;
+  font-size: .9rem;
+  margin-bottom: 24px;
+  transition: color .2s;
+}
+.back-link:hover { color: var(--primary); }
+
+.hidden { display: none !important; }
+
+.status-card {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.status-icon { font-size: 3rem; margin-bottom: 16px; }
+.status-success { color: #10b981; }
