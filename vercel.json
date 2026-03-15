@@ -4,13 +4,12 @@
   "builds": [
     { "src": "api/*.php", "use": "vercel-php@0.7.1" },
     { "src": "*.php", "use": "vercel-php@0.7.1" },
-    { "src": "!( *.php )", "use": "@vercel/static" },
-    { "src": "libs/**", "use": "@vercel/static" }
+    { "src": "**", "use": "@vercel/static" }
   ],
   "rewrites": [
     { "source": "/", "destination": "/index.php" },
-    { "source": "/api/(.*).php", "destination": "/api/$1.php" },
-    { "source": "/(?!.*\\.)(.*)", "destination": "/$1.php" }
+    { "source": "/api/:path((?!.*\\.).*)", "destination": "/api/:path.php" },
+    { "source": "/:path((?!.*\\.).*)", "destination": "/:path.php" }
   ],
   "headers": [
     {
