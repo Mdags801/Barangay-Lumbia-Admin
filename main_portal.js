@@ -173,6 +173,7 @@
     let globalIncidentsChannel = null;
     let profilesChannel = null;
     let presenceUIInitialized = false;
+    let isSystemInitialized = false;
     let currentAuthSession = null;
     let isPresenceStarting = false;
 
@@ -216,11 +217,13 @@
         signOutBtn.style.display = '';
         if (presenceFab) presenceFab.style.display = 'flex';
         
-        // Only initialize once profile is ready
-        initPresenceSystem();
-        initGlobalAlarm();
-        subscribeGlobalIncidents();
-        monitorAccountRequests();
+        if (!isSystemInitialized) {
+          initPresenceSystem();
+          initGlobalAlarm();
+          subscribeGlobalIncidents();
+          monitorAccountRequests();
+          isSystemInitialized = true;
+        }
 
         // Sync greeting to iframe if it's already loaded
         syncGreetingToIframe();

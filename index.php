@@ -19,6 +19,8 @@
   <link rel="stylesheet" href="global.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/svgs/solid/shield-halved.svg">
 </head>
 
 <body>
