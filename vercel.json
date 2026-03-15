@@ -1,19 +1,18 @@
 {
   "version": 2,
+  "cleanUrls": true,
+  "trailingSlash": false,
   "builds": [
     { "src": "api/*.php", "use": "vercel-php@0.7.1" },
     { "src": "*.php", "use": "vercel-php@0.7.1" },
-    { "src": "!( *.php )", "use": "@vercel/static" }
+    { "src": "**/*.{css,js,png,jpg,svg,ico,json,min.js}", "use": "@vercel/static" },
+    { "src": "libs/**", "use": "@vercel/static" }
   ],
-  "routes": [
-    { "src": "/api/send_otp.php", "dest": "/api/send_otp.php" },
-    { "src": "/api/verify_otp.php", "dest": "/api/verify_otp.php" },
-    { "src": "/api/(.*).php", "dest": "/api/$1.php" },
-    { "src": "/api/([^.]+)", "dest": "/api/$1.php" },
-    { "src": "/(.*).php", "dest": "/$1.php" },
-    { "src": "/(.*).(css|js|png|jpg|svg|ico)", "dest": "/$1.$2" },
-    { "src": "/", "dest": "/index.php" },
-    { "src": "/([^.]+)", "dest": "/$1.php" }
+  "rewrites": [
+    { "source": "/api/send_otp", "destination": "/api/send_otp.php" },
+    { "source": "/api/verify_otp", "destination": "/api/verify_otp.php" },
+    { "source": "/api/:path*", "destination": "/api/:path*.php" },
+    { "source": "/(?!api/)(.*)", "destination": "/$1.php", "has": [{ "type": "header", "key": "accept", "value": "text/html" }] }
   ],
   "headers": [
     {

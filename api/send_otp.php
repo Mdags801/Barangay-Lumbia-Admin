@@ -75,7 +75,14 @@ $data = json_decode($response, true);
 
 if ($status >= 400) {
     http_response_code(400);
-    echo json_encode(['error' => $data['msg'] ?? $data['error_description'] ?? 'Failed to send OTP.']);
+    $errMsg = $data['msg'] ?? $data['error_description'] ?? $data['message'] ?? 'Failed to send OTP.';
+    echo json_encode([
+        'error' => $errMsg,
+        'debug' => [
+            'status' => $status,
+            'raw' => $response
+        ]
+    ]);
     exit;
 }
 
