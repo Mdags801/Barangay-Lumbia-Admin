@@ -14,7 +14,7 @@ session_set_cookie_params([
 ]);
 if (session_status() === PHP_SESSION_NONE) session_start();
 
-if (!empty($_SESSION['user_id']) && !empty($_SESSION['role'])) {
+if (!empty($_SESSION['user_id']) && !empty($_SESSION['role']) && empty($_GET['error'])) {
     header('Location: index.php');
     exit;
 }

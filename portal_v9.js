@@ -1,5 +1,5 @@
-/* portal_v9.js — Version 9.0 (Isolated & Secure) - Sync: 2026-03-15 23:42 */
-console.log('%c [System] Core Version 9.0 (Isolated & Stable) ', 'background: #1e3a8a; color: #fff; padding: 6px; border-radius: 4px; font-weight: bold; font-size: 14px;');
+/* portal_v9.js — Version 9.1 (Isolated & Secure) - Sync: 2026-03-16 03:58 */
+console.log('%c [System] Core Version 9.1 (Isolated & Stable) ', 'background: #1e3a8a; color: #fff; padding: 6px; border-radius: 4px; font-weight: bold; font-size: 14px;');
 
 // --- Supabase Initialization ---
     const SUPABASE_URL = 'https://tukkkwtxuaxrbihyammp.supabase.co';
@@ -208,7 +208,11 @@ console.log('%c [System] Core Version 9.0 (Isolated & Stable) ', 'background: #1
         if (role === 'citizen' || role === 'responder' || status === 'suspended' || status === 'pending') {
           await supabase.auth.signOut();
           const errorType = (status === 'pending') ? 'pending_approval' : 'access_denied';
-          window.location.href = `login.php?error=${errorType}`;
+          
+          // Only redirect if NOT already on login.php to prevent loops
+          if (!window.location.pathname.includes('login.php')) {
+            window.location.href = `login.php?error=${errorType}`;
+          }
           return;
         }
 
