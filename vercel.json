@@ -5,14 +5,14 @@
   "builds": [
     { "src": "api/*.php", "use": "vercel-php@0.7.1" },
     { "src": "*.php", "use": "vercel-php@0.7.1" },
-    { "src": "**/*.{css,js,png,jpg,svg,ico,json,min.js}", "use": "@vercel/static" },
-    { "src": "libs/**", "use": "@vercel/static" }
+    { "src": "!( *.php )", "use": "@vercel/static" }
   ],
   "rewrites": [
+    { "source": "/", "destination": "/index.php" },
     { "source": "/api/send_otp", "destination": "/api/send_otp.php" },
     { "source": "/api/verify_otp", "destination": "/api/verify_otp.php" },
     { "source": "/api/:path*", "destination": "/api/:path*.php" },
-    { "source": "/(?!api/)(.*)", "destination": "/$1.php", "has": [{ "type": "header", "key": "accept", "value": "text/html" }] }
+    { "source": "/:filename((?!api/).*)", "destination": "/:filename.php", "has": [{ "type": "header", "key": "accept", "value": "text/html" }] }
   ],
   "headers": [
     {
