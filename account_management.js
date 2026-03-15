@@ -117,7 +117,10 @@ const SUPABASE_URL = "https://tukkkwtxuaxrbihyammp.supabase.co";
       document.getElementById('totalUsers').innerText = allProfiles.length;
       const countLabel = document.getElementById('staffCount');
       if (countLabel) {
-        countLabel.innerText = allProfiles.filter(u => ['super admin', 'admin', 'staff', 'responder'].includes(u.role?.toLowerCase())).length;
+        countLabel.innerText = allProfiles.filter(u => 
+          ['super admin', 'admin', 'staff', 'responder'].includes(u.role?.toLowerCase()) && 
+          u.status === 'Active'
+        ).length;
       }
     }
 

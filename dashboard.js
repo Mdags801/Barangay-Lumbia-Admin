@@ -278,7 +278,8 @@ console.log('%c [Module] Dashboard v8.0 Active ', 'color: #8b5cf6; font-weight: 
         const { count, error } = await supabaseDashboard
           .from('profiles')
           .select('*', { count: 'exact', head: true })
-          .eq('role', 'responder');
+          .eq('role', 'responder')
+          .eq('status', 'Active');
 
         if (!error && count !== null) {
           responderCountEl.textContent = count;

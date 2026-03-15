@@ -202,11 +202,13 @@ console.log('%c [System] Core Version 9.0 (Isolated & Stable) ', 'background: #1
         currentUserProfile = data || { role: 'staff', full_name: user.email.split('@')[0] };
 
         const role = (currentUserProfile.role || 'staff').toLowerCase();
+        const status = (currentUserProfile.status || 'Active');
 
-        // Security Gate: Citizens and Responders cannot access the website
-        if (role === 'citizen' || role === 'responder') {
+        // Security Gate: Citizens, Responders, or Suspended/Pending users cannot access the portal
+        if (role === 'citizen' || role === 'responder' || status === 'Suspended' || status === 'Pending') {
           await supabase.auth.signOut();
-          window.location.href = 'login.php?error=access_denied';
+          const errorType = (status === 'Pending') ? 'pending_approval' : 'access_denied';
+          window.location.href = `login.php?error=${errorType}`;
           return;
         }
 
