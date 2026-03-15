@@ -1,4 +1,5 @@
-// ---------- CONFIG: make sure these match your project (Project Settings â†’ API) ----------
+console.log('%c [Module] Incident Manager v8.0 Active ', 'color: #3b82f6; font-weight: bold;');
+// ---------- CONFIG: make sure these match your project ----------
 const SUPABASE_URL = "https://tukkkwtxuaxrbihyammp.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_23puPo1jOwFggf-4YTitRg_BQiGQl9P";
 const MAPTILER_KEY = "31um5bDFFFAugzBg82HC";

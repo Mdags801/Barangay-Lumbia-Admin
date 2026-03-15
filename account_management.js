@@ -1,3 +1,4 @@
+console.log('%c [Module] Account Management v8.0 Active ', 'color: #10b981; font-weight: bold;');
 /* account_management.js */
 
 const SUPABASE_URL = "https://tukkkwtxuaxrbihyammp.supabase.co";

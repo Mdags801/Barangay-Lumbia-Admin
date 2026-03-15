@@ -1,3 +1,4 @@
+console.log('%c [Module] Reports System v8.0 Active ', 'color: #3b82f6; font-weight: bold;');
 /* reports.js — Reports page logic */
 
 // Replace with your Supabase project URL and anon key

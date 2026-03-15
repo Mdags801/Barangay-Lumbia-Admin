@@ -1,3 +1,4 @@
+console.log('%c [Module] Auth Login v8.0 Active ', 'color: #3b82f6; font-weight: bold;');
 /* login.js — Login page logic. Calls PHP API endpoints, never Supabase directly. */
 document.addEventListener('DOMContentLoaded', () => {
   const emailEl  = document.getElementById('email');

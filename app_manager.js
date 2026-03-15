@@ -1,3 +1,4 @@
+console.log('%c [Module] App Manager v8.0 Active ', 'color: #f59e0b; font-weight: bold;');
 // ---------- Config ----------
 // Replace with your Supabase project URL and anon key
 const SUPABASE_URL = "https://tukkkwtxuaxrbihyammp.supabase.co";

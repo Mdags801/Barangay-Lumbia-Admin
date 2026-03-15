@@ -1,3 +1,4 @@
+console.log('%c [Module] Auth Reset v8.0 Active ', 'color: #ef4444; font-weight: bold;');
 /* reset.js — Reset/forgot password page logic */
 const supabase = window.supabase.createClient(
   "https://tukkkwtxuaxrbihyammp.supabase.co",

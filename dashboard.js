@@ -1,3 +1,4 @@
+console.log('%c [Module] Dashboard v8.0 Active ', 'color: #8b5cf6; font-weight: bold;');
 /* dashboard.js — Dashboard page logic */
 
 // ---------- Supabase config ----------
