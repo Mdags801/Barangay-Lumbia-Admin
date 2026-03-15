@@ -63,6 +63,14 @@ $prefilledError = $errorMsgs[$errorParam] ?? '';
           <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required />
         </div>
 
+        <div class="field" id="passwordField" style="display:none;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <label for="password">Password</label>
+            <a href="reset.php" style="font-size:0.75rem;color:#3b82f6;text-decoration:none;">Forgot?</a>
+          </div>
+          <input id="password" name="password" type="password" autocomplete="current-password" placeholder="••••••••" />
+        </div>
+
         <div class="field" id="otpField" style="display:none;">
           <label for="otpCode">6-Digit Verification Code</label>
           <input id="otpCode" name="otpCode" type="text" inputmode="numeric" maxlength="6"
@@ -70,14 +78,21 @@ $prefilledError = $errorMsgs[$errorParam] ?? '';
         </div>
 
         <div class="actions">
-          <button id="loginBtn"  class="btn-primary">Send OTP Code</button>
-          <button id="verifyBtn" class="btn-primary" style="display:none;background:#10b981;">Verify &amp; Log In</button>
-          <button id="toSignup"  class="btn-ghost" type="button">Create an account</button>
+          <!-- OTP Buttons -->
+          <button id="sendOtpBtn" class="btn-primary">Send OTP Code</button>
+          <button id="verifyOtpBtn" class="btn-primary" style="display:none;background:#10b981;">Verify &amp; Log In</button>
+          
+          <!-- Password Button -->
+          <button id="passwordLoginBtn" class="btn-primary" style="display:none;">Log In with Password</button>
+          
+          <button id="toggleLoginMode" class="btn-ghost" style="margin-top:8px;font-size:0.85rem;color:#6b7280;" type="button">
+            Use password instead
+          </button>
+          
+          <button id="toSignup"  class="btn-ghost" type="button" style="margin-top:0;">Create an account</button>
         </div>
 
-        <?php if (!$prefilledError): ?>
         <div id="msg" aria-live="polite" style="margin-top:12px"></div>
-        <?php endif; ?>
       </section>
 
       <aside class="auth-visual" aria-hidden="true">
