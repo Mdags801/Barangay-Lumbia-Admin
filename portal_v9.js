@@ -776,67 +776,64 @@ console.log('%c [System] Core Version 9.1 (Isolated & Stable) ', 'background: #1
         currentAuthSession = session;
         console.log('[Presence v9] Joining as:', session.user.id);
 
-        presenceChannel = supabase.channel('app_presence_v9', {
-          config: { presence: { key: session.user.id } }
-        });
+        presenceChannel = supabase.channel('app_presence_v9');
 
         const updateStatus = (status, error) => {
           console.log(`[Presence] Status: ${status}`, error || '');
           const statusIcon = document.getElementById('presenceStatusIcon');
           const statusText = document.getElementById('presenceStatusText');
           if (statusIcon && statusText) {
-             if (status === 'SUBSCRIBED') {
-                statusIcon.style.color = '#10b981';
-                statusText.textContent = 'Live Sync Active';
-             } else {
-                statusIcon.style.color = '#f59e0b';
-                statusText.textContent = `Connecting (${status})...`;
-             }
+            if (status === 'SUBSCRIBED') {
+              statusIcon.style.color = '#10b981';
+              statusText.textContent = 'Live Sync Active';
+            } else if (status === 'CLOSED') {
+              statusIcon.style.color = '#ef4444';
+              statusText.textContent = 'Connection Closed';
+            } else {
+              statusIcon.style.color = '#f59e0b';
+              statusText.textContent = `Connecting (${status})...`;
+            }
           }
         };
 
         presenceChannel
           .on('presence', { event: 'sync' }, () => {
+            console.log('[Presence] Syncing state...');
             renderActiveUsers();
           })
-          .on('presence', { event: 'join' }, ({ newPresences }) => {
-            console.log('[Presence] Join Event:', newPresences);
+          .on('presence', { event: 'join' }, ({ key, newPresences }) => {
+            console.log('[Presence] User Joined:', key, newPresences);
             renderActiveUsers();
           })
-          .on('presence', { event: 'leave' }, ({ leftPresences }) => {
-            console.log('[Presence] Leave Event:', leftPresences);
+          .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+            console.log('[Presence] User Left:', key, leftPresences);
             renderActiveUsers();
           })
           .subscribe(async (status) => {
             updateStatus(status);
+            
             if (status === 'SUBSCRIBED') {
-              try {
+              // Get current identity
+              if (!currentUserProfile) {
                 const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
                 if (profile) currentUserProfile = profile;
-
-                const presenceData = {
-                  user_id: session.user.id,
-                  email: session.user.email,
-                  name: currentUserProfile?.full_name || session.user.email.split('@')[0],
-                  role: currentUserProfile?.role || 'Admin',
-                  status: 'Online',
-                  online_at: new Date().toISOString(),
-                  platform: 'Web Portal'
-                };
-
-                if (!window._lastPresenceTrackTime || Date.now() - window._lastPresenceTrackTime > 5000) {
-                  console.log('%c [Presence] Syncing identity: ' + presenceData.name + ' ', 'color: #10b981; font-weight: bold;');
-                  window._lastPresenceTrackTime = Date.now();
-                  const trackResult = await presenceChannel.track(presenceData);
-                  if (trackResult !== 'ok') console.warn('[Presence] Track failed:', trackResult);
-                }
-              } catch (trackErr) {
-                console.error('[Presence] Tracking error:', trackErr);
               }
-            } else if (status === 'CHANNEL_ERROR') {
-               console.error('[Presence] Channel Error. Possible causes: 1. Realtime disabled in Dashboard. 2. Duplicate connection. 3. Network firewall.');
-               isPresenceStarting = false;
-               presenceChannel = null;
+
+              const presenceData = {
+                user_id: session.user.id,
+                email: session.user.email,
+                name: currentUserProfile?.full_name || session.user.email.split('@')[0],
+                role: currentUserProfile?.role || 'Admin',
+                status: 'Online',
+                online_at: new Date().toISOString(),
+                platform: 'Web Portal'
+              };
+
+              console.log('%c [Presence] Tracking self: ' + presenceData.name, 'color: #10b981; font-weight: bold;');
+              const trackResult = await presenceChannel.track(presenceData);
+              if (trackResult !== 'ok') {
+                console.warn('[Presence] Track failed:', trackResult);
+              }
             }
           });
       } catch (err) {
