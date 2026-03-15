@@ -137,8 +137,8 @@
 
 
 
-  <!-- Main Script (Version 3) -->
-  <script src="main_portal.js?v=3"></script>
+  <!-- System Core (v5.0 Stable) -->
+  <script src="system_core.js?v=5.0"></script>
 
   <!-- ===== ACTIVE USERS FLOATING BUTTON ===== -->
   <button id="activeUsersBtn" class="active-users-fab" aria-label="Show active users" title="Active Users">
@@ -147,7 +147,7 @@
   </button>
 
   <!-- ===== ACTIVE USERS DRAWER ===== -->
-  <div id="activeUsersDrawer" class="active-drawer" aria-hidden="false" role="dialog" aria-label="Active users">
+  <div id="activeUsersDrawer" class="active-drawer" role="dialog" aria-label="Active users" aria-hidden="false" style="visibility: hidden;">
     <div class="active-drawer-header">
       <div class="active-drawer-title">
         <span class="live-dot-pulse"></span>
