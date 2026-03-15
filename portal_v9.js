@@ -813,7 +813,13 @@ console.log('%c [System] Core Version 9.1 (Isolated & Stable) ', 'background: #1
         currentAuthSession = session;
         console.log('[Presence v9] Joining as:', session.user.id);
 
-        presenceChannel = supabase.channel('app_presence_v9');
+        // Channel with broadcast and presence explicitly enabled (Supabase v2 docs)
+        presenceChannel = supabase.channel('app_presence_v9', {
+          config: {
+            broadcast: { self: true },
+            presence:  { key: session.user.id }
+          }
+        });
 
         const updateStatus = (status, error) => {
           console.log(`[Presence] Status: ${status}`, error || '');
@@ -835,15 +841,17 @@ console.log('%c [System] Core Version 9.1 (Isolated & Stable) ', 'background: #1
 
         presenceChannel
           .on('presence', { event: 'sync' }, () => {
-            console.log('[Presence] Syncing state...');
+            const state = presenceChannel.presenceState();
+            const count = Object.keys(state).length;
+            console.log(`[Presence] Sync — ${count} users online:`, Object.keys(state));
             renderActiveUsers();
           })
           .on('presence', { event: 'join' }, ({ key, newPresences }) => {
-            console.log('[Presence] User Joined:', key, newPresences);
+            console.log('[Presence] ✅ User Joined:', key, newPresences);
             renderActiveUsers();
           })
           .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
-            console.log('[Presence] User Left:', key, leftPresences);
+            console.log('[Presence] ❌ User Left:', key, leftPresences);
             renderActiveUsers();
           })
           .subscribe(async (status) => {
@@ -941,6 +949,11 @@ console.log('%c [System] Core Version 9.1 (Isolated & Stable) ', 'background: #1
         }
       }
       startPresenceTracking();
+      
+      // Periodic refresh every 15s to keep badge + list accurate
+      setInterval(() => {
+        if (presenceChannel) renderActiveUsers();
+      }, 15000);
     }
 
     // =============================================================
