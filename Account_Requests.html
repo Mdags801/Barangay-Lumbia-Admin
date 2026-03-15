@@ -379,7 +379,8 @@
           .from('profiles')
           .select('*')
           .eq('status', 'Pending');
-          // Removed ordering by ID as it's a UUID, if created_at exists it will be sorted later
+
+        console.log('Fetched raw profiles data:', data, 'error:', error);
 
         if (error) throw error;
 
