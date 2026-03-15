@@ -801,14 +801,23 @@ console.log('%c [System] Core Version 9.1 (Isolated & Stable) ', 'background: #1
           }
         };
 
+        // Track who we've already replied to - prevents infinite reply loops
+        const repliedTo = new Set();
+
         presenceChannel
           // Someone came online
           .on('broadcast', { event: 'user_online' }, ({ payload }) => {
             if (!payload?.user_id) return;
-            console.log('[Broadcast] ✅ User online:', payload.name, payload.user_id);
+            const isNewUser = !broadcastUsers.has(payload.user_id);
             broadcastUsers.set(payload.user_id, payload);
-            // Reply with our own data so the newcomer sees us too
-            presenceChannel.send({ type: 'broadcast', event: 'user_online', payload: myData });
+            
+            // Only reply ONCE when a new user appears so they know we exist
+            // (Don't reply to heartbeat updates from known users - that would cause an infinite loop)
+            if (isNewUser && !repliedTo.has(payload.user_id)) {
+              repliedTo.add(payload.user_id);
+              console.log('[Broadcast] ✅ New user online:', payload.name, '- announcing self back');
+              presenceChannel.send({ type: 'broadcast', event: 'user_online', payload: myData });
+            }
             renderActiveUsers();
           })
           // Someone went offline
@@ -816,6 +825,7 @@ console.log('%c [System] Core Version 9.1 (Isolated & Stable) ', 'background: #1
             if (!payload?.user_id) return;
             console.log('[Broadcast] ❌ User offline:', payload.user_id);
             broadcastUsers.delete(payload.user_id);
+            repliedTo.delete(payload.user_id); // Allow re-reply if they come back
             renderActiveUsers();
           })
           .subscribe(async (status) => {
@@ -825,14 +835,14 @@ console.log('%c [System] Core Version 9.1 (Isolated & Stable) ', 'background: #1
               console.log('%c [Presence] Broadcasting self: ' + myData.name, 'color: #10b981; font-weight: bold;');
               await presenceChannel.send({ type: 'broadcast', event: 'user_online', payload: myData });
 
-              // Heartbeat: re-announce every 30s so others see us stay online
+              // Heartbeat every 15s (so new joiners discover us within 15s)
               heartbeatInterval = setInterval(async () => {
                 await presenceChannel.send({
                   type: 'broadcast',
                   event: 'user_online',
                   payload: { ...myData, online_at: new Date().toISOString() }
                 });
-              }, 30000);
+              }, 15000);
 
               // Announce offline when the tab closes
               window.addEventListener('beforeunload', async () => {
