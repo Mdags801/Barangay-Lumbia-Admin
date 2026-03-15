@@ -11,10 +11,45 @@ document.addEventListener('DOMContentLoaded', async () => {
   const successStep = document.getElementById('successStep');
   const msgBox      = document.getElementById('msg');
 
+  // Helper to show the premium GUI modal
+  window.showAlert = function(title, text, type = 'info') {
+    const modal = document.getElementById('alertModal');
+    const titleEl = document.getElementById('alertTitle');
+    const textEl = document.getElementById('alertText');
+    const iconEl = document.getElementById('alertIcon');
+    const circleEl = document.getElementById('alertIconCircle');
+
+    titleEl.textContent = title;
+    textEl.textContent = text;
+    
+    // Customize based on type
+    if (type === 'error') {
+      circleEl.style.background = '#fef2f2';
+      circleEl.style.color = '#dc2626';
+      iconEl.className = 'fas fa-exclamation-circle';
+    } else {
+      circleEl.style.background = '#f1f5f9';
+      circleEl.style.color = '#1e40af';
+      iconEl.className = 'fas fa-info-circle';
+    }
+
+    modal.style.display = 'flex';
+  };
+
+  // OVERRIDE BROWSER ALERT: This replaces any ugly alert() with our GUI
+  window.alert = function(msg) {
+    window.showAlert('System Notification', msg);
+  };
+
   function showMsg(text, isError = false) {
     msgBox.textContent = text;
     msgBox.style.color = isError ? '#ef4444' : '#10b981';
     msgBox.className = isError ? 'error' : 'success';
+    
+    // If it's an error, also show the user-friendly GUI
+    if (isError && text) {
+      window.showAlert('Issue Detected', text, 'error');
+    }
   }
 
   // 1. Initial State Check
@@ -50,6 +85,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // The live URL where users will be sent back to
     const resetPageUrl = window.location.origin + window.location.pathname;
 
+    // GUI FEEDBACK: Inform the user we are requesting the link
+    window.showAlert('Processing Request', 'We are connecting to the secure gateway to send your recovery link. Please wait...', 'info');
+
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: resetPageUrl,
     });
@@ -59,6 +97,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       btn.disabled = false;
       btn.textContent = 'Send Reset Link';
     } else {
+      // Close the "processing" alert before showing the success state
+      document.getElementById('alertModal').style.display = 'none';
       requestStep.classList.add('hidden');
       successStep.classList.remove('hidden');
       showMsg(''); // Clear any previous errors
