@@ -208,6 +208,25 @@
       color: white;
     }
 
+    .active-user-name i {
+      filter: drop-shadow(0 0 2px rgba(0,0,0,0.1));
+      margin-left: 2px;
+    }
+
+    [title]:hover::after {
+      content: attr(title);
+      position: absolute;
+      background: #334155;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      white-space: nowrap;
+      top: -25px;
+      left: 0;
+      z-index: 100;
+    }
+
     @keyframes fadeIn {
       from {
         opacity: 0;
@@ -924,8 +943,9 @@
               <span class="status-dot ${isActive ? 'online' : 'away'}"></span>
             </div>
             <div class="active-user-info">
-              <div class="active-user-name">
+              <div class="active-user-name" style="display:flex; align-items:center; gap:6px;">
                 ${name} ${isMe ? '<span class="me-pill">YOU</span>' : ''}
+                ${u.platform ? `<i class="fas fa-${u.platform.includes('Mobile') ? 'mobile-alt' : 'desktop'}" style="font-size:0.6rem; opacity:0.5;" title="${u.platform}"></i>` : ''}
               </div>
               <div class="active-user-role" style="font-size: 0.7rem; color: ${config.color}; font-weight: 700; text-transform: uppercase;">
                 ${role}
@@ -984,7 +1004,8 @@
                 name: currentUserProfile?.full_name || session.user.email.split('@')[0],
                 role: currentUserProfile?.role || 'Admin',
                 status: 'Online',
-                online_at: new Date().toISOString()
+                online_at: new Date().toISOString(),
+                platform: 'Web Portal'
               };
 
               console.log('[Presence] Tracking:', presenceData);
