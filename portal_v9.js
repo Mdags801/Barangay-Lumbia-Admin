@@ -844,23 +844,39 @@ console.log('%c [System] Core Version 9.0 (Isolated & Stable) ', 'background: #1
             drawer.classList.add('open'); 
             overlay.classList.add('open'); 
             drawer.style.visibility = 'visible';
-            drawer.setAttribute('aria-hidden', 'false'); // Set to false explicitly
+            drawer.setAttribute('aria-hidden', 'false'); 
+            drawer.removeAttribute('inert'); // Make interactive
+            
             const closeBtn = document.getElementById('closeActiveDrawer');
-            if (closeBtn) setTimeout(() => closeBtn.focus(), 50); // Delayed focus for DOM update
+            if (closeBtn) {
+              setTimeout(() => closeBtn.focus(), 50); 
+            }
             renderActiveUsers(); 
           };
-          closeBtn.onclick = overlay.onclick = () => { 
-            drawer.classList.remove('open'); 
-            overlay.classList.remove('open'); 
+
+          const closeDrawer = () => {
             const fab = document.getElementById('activeUsersBtn');
-            if (fab) fab.focus(); // Return focus to trigger
+            const drawer = document.getElementById('activeUsersDrawer');
+            const overlay = document.getElementById('activeDrawerOverlay');
+            
+            // 1. Move focus out of the drawer IMMEDIATELY
+            if (fab) fab.focus(); 
+            
+            // 2. Hide UI
+            if (drawer) drawer.classList.remove('open'); 
+            if (overlay) overlay.classList.remove('open'); 
+            
+            // 3. Set state after transition
             setTimeout(() => {
-              if (!drawer.classList.contains('open')) {
+              if (drawer && !drawer.classList.contains('open')) {
                 drawer.style.visibility = 'hidden';
                 drawer.setAttribute('aria-hidden', 'true');
+                drawer.setAttribute('inert', ''); // Disable all interaction
               }
             }, 400); 
           };
+
+          closeBtn.onclick = overlay.onclick = closeDrawer;
           
           if (searchInput) {
             searchInput.oninput = () => {
@@ -868,7 +884,11 @@ console.log('%c [System] Core Version 9.0 (Isolated & Stable) ', 'background: #1
             };
           }
 
-          document.addEventListener('keydown', e => { if (e.key === 'Escape') { drawer.classList.remove('open'); overlay.classList.remove('open'); } });
+          document.addEventListener('keydown', e => { 
+            if (e.key === 'Escape' && drawer.classList.contains('open')) { 
+              closeDrawer();
+            } 
+          });
           presenceUIInitialized = true;
         }
       }
