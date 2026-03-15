@@ -106,7 +106,7 @@ $role   = strtolower($profile['role']   ?? '');
 $status = strtolower($profile['status'] ?? 'pending');
 
 // ─── Role check ───────────────────────────────────────────────────────────────
-if (in_array($role, ['citizen', 'responder'])) {
+if (!in_array($role, array_map('strtolower', ALLOWED_ROLES))) {
     http_response_code(403);
     echo json_encode(['error' => 'Access Denied: This portal is for administrative personnel only.']);
     exit;
@@ -136,8 +136,10 @@ $_SESSION['access_token'] = $accessToken;         // kept server-side only
 $_SESSION['last_activity']= time();
 
 echo json_encode([
-    'success'   => true,
-    'role'      => $profile['role'],
-    'full_name' => $profile['full_name'] ?? '',
-    'redirect'  => 'index.php',
+    'success'       => true,
+    'role'          => $profile['role'],
+    'full_name'     => $profile['full_name'] ?? '',
+    'redirect'      => 'index.php',
+    'access_token'  => $accessToken,
+    'refresh_token' => $data['refresh_token'] ?? '',
 ]);

@@ -36,6 +36,8 @@ $prefilledError = $errorMsgs[$errorParam] ?? '';
   <link rel="stylesheet" href="global.css">
   <link rel="stylesheet" href="auth.css">
   <link rel="stylesheet" href="login.css">
+  <!-- Supabase SDK for client-side session persistence -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
   <main class="auth-shell" role="main">

@@ -1,5 +1,12 @@
-console.log('%c [Module] Auth Login v9.1 Active ', 'color: #3b82f6; font-weight: bold;');
+console.log('%c [Module] Auth Login v9.2 Active ', 'color: #3b82f6; font-weight: bold;');
 /* login.js — Handles both OTP and Password login methods. */
+
+// Supabase client for client-side session persistence
+const SUPA_URL = 'https://tukkkwtxuaxrbihyammp.supabase.co';
+const SUPA_KEY = 'sb_publishable_23puPo1jOwFggf-4YTitRg_BQiGQl9P';
+const sbClient = window.supabase?.createClient
+  ? window.supabase.createClient(SUPA_URL, SUPA_KEY, { auth: { persistSession: true } })
+  : null;
 document.addEventListener('DOMContentLoaded', () => {
   const emailEl       = document.getElementById('email');
   const passwordEl    = document.getElementById('password');
@@ -45,8 +52,11 @@ document.addEventListener('DOMContentLoaded', () => {
       passwordField.style.display = 'none';
       passwordLoginBtn.style.display = 'none';
       
+      otpField.style.display = 'none';
+      verifyOtpBtn.style.display = 'none';
       sendOtpBtn.style.display = 'block';
     }
+    emailEl.disabled = false;
     showMsg('');
   });
 
@@ -101,6 +111,16 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error || 'Invalid code');
 
+      // Establish Supabase JS client-side session using the token returned by the API
+      if (sbClient && data.access_token) {
+        const { error: sbErr } = await sbClient.auth.setSession({
+          access_token: data.access_token,
+          refresh_token: data.refresh_token || ''
+        });
+        if (sbErr) console.warn('[Login] Supabase JS session (OTP) failed (non-critical):', sbErr.message);
+        else console.log('[Login] Supabase JS session established via OTP.');
+      }
+
       showMsg('Login successful!');
       setTimeout(() => window.location.href = data.redirect || 'index.php', 800);
     } catch (err) {
@@ -130,6 +150,14 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       const data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error || 'Invalid credentials');
+
+      // Also sign into Supabase JS client so the browser has a live session,
+      // enabling presence tracking and real-time features after redirect.
+      if (sbClient) {
+        const { error: sbErr } = await sbClient.auth.signInWithPassword({ email, password });
+        if (sbErr) console.warn('[Login] Supabase JS sign-in failed (non-critical):', sbErr.message);
+        else console.log('[Login] Supabase JS session established.');
+      }
 
       showMsg('Login successful!');
       setTimeout(() => window.location.href = data.redirect || 'index.php', 800);
