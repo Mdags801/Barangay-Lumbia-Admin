@@ -3,12 +3,13 @@
   "trailingSlash": false,
   "builds": [
     { "src": "api/*.php", "use": "vercel-php@0.7.1" },
-    { "src": "*.php", "use": "vercel-php@0.7.1" }
+    { "src": "*.php", "use": "vercel-php@0.7.1" },
+    { "src": "**", "use": "@vercel/static" }
   ],
   "rewrites": [
     { "source": "/", "destination": "/index.php" },
-    { "source": "/api/(.*)", "destination": "/api/$1.php" },
-    { "source": "/((?!api/).*)", "destination": "/$1.php" }
+    { "source": "/api/(.*).php", "destination": "/api/$1.php" },
+    { "source": "/(?!.*\\.)(.*)", "destination": "/$1.php" }
   ],
   "headers": [
     {
