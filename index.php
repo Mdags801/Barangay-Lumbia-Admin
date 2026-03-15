@@ -144,13 +144,17 @@ require_once __DIR__ . '/session_guard.php';
 
 
 
-  <!-- System Core (v9.0 - Final Stability) -->
+  <!-- System Core (v9.1 - Final Stability) -->
   <script>
-    // Bridge the PHP session into the Supabase JS client
+    // Bridge the PHP session into the JS layer (full user info)
     window.PHP_SESSION = {
-      access_token: <?php echo json_encode($_SESSION['access_token'] ?? ''); ?>
+      access_token: <?php echo json_encode($_SESSION['access_token'] ?? ''); ?>,
+      user_id:      <?php echo json_encode($_SESSION['user_id']     ?? ''); ?>,
+      email:        <?php echo json_encode($_SESSION['email']       ?? ''); ?>,
+      role:         <?php echo json_encode($_SESSION['role']        ?? ''); ?>,
+      full_name:    <?php echo json_encode($_SESSION['full_name']   ?? ''); ?>
     };
-    console.log('[System] Bridged PHP Session:', window.PHP_SESSION.access_token ? 'Token Found' : 'TOKEN MISSING');
+    console.log('[System] PHP Session:', window.PHP_SESSION.email || 'NO SESSION');
   </script>
   <script src="portal_v9.js?v=<?php echo time(); ?>"></script>
 

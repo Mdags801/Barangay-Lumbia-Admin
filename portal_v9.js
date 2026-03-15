@@ -197,7 +197,7 @@ console.log('%c [System] Core Version 9.1 (Isolated & Stable) ', 'background: #1
       const presenceFab = document.getElementById('activeUsersBtn');
 
       if (user) {
-        // Show basic UI elements immediately to improve perceived speed
+        // Show basic UI elements immediately
         if (presenceFab) presenceFab.style.display = 'flex';
         signInBtn.style.display = 'none';
         signOutBtn.style.display = '';
@@ -205,19 +205,24 @@ console.log('%c [System] Core Version 9.1 (Isolated & Stable) ', 'background: #1
         userInfo.style.alignItems = 'center';
         userInfo.style.gap = '8px';
 
-        // Fetch Detail Profile in background
-        const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
-        currentUserProfile = data || { role: 'staff', full_name: user.email.split('@')[0] };
+        // Use PHP profile fallback if available (avoids Supabase query when JS session is absent)
+        if (user._phpProfile) {
+          currentUserProfile = user._phpProfile;
+          console.log('[Auth] Using PHP profile fallback:', currentUserProfile.full_name, '/', currentUserProfile.role);
+        } else {
+          // Fetch from Supabase if we have a real session
+          const { data } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
+          currentUserProfile = data || { role: 'staff', full_name: user.email?.split('@')[0] || 'Admin' };
+        }
 
         const role = (currentUserProfile.role || 'staff').toLowerCase();
         const status = (currentUserProfile.status || 'active').toLowerCase();
         
-        // Security Gate: Citizens, Responders, or Suspended/Pending users cannot access the portal
+        // Security Gate
         if (role === 'citizen' || role === 'responder' || status === 'suspended' || status === 'pending') {
           console.warn('[Security] Access denied for role:', role, 'status:', status);
           await supabase.auth.signOut();
           const errorType = (status === 'pending') ? 'pending_approval' : 'access_denied';
-          
           if (!window.location.pathname.includes('login.php')) {
             window.location.href = `login.php?error=${errorType}`;
           }
@@ -226,10 +231,10 @@ console.log('%c [System] Core Version 9.1 (Isolated & Stable) ', 'background: #1
 
         applyRolePermissions(role);
 
-        // Update display with real name if available
+        // Render name + role in topbar
         userEmail.innerHTML = `
           <div style="display:flex; flex-direction:column; line-height:1.2;">
-            <span style="font-weight:600;">${currentUserProfile.full_name || user.email}</span>
+            <span style="font-weight:600;">${currentUserProfile.full_name || user.email || 'Admin'}</span>
             <span style="font-size:10px; text-transform:uppercase; color:var(--primary); font-weight:700;">${role}</span>
           </div>
         `;
@@ -278,26 +283,48 @@ console.log('%c [System] Core Version 9.1 (Isolated & Stable) ', 'background: #1
       console.log('[Auth] Checking session...');
       let { data: { session } } = await supabase.auth.getSession();
       
-      // If JS session is missing but PHP has a token, set it manually
-      if (!session && window.PHP_SESSION?.access_token) {
-        console.log('[Auth] Attempting to bridge PHP token...');
+      if (session) {
+        console.log('[Auth] Existing Supabase JS session found.');
+        updateAuthUI(session.user);
+        return;
+      }
+
+      // Try to bridge the PHP access token into Supabase JS
+      if (window.PHP_SESSION?.access_token) {
+        console.log('[Auth] Bridging PHP token into Supabase...');
         const { data, error } = await supabase.auth.setSession({
           access_token: window.PHP_SESSION.access_token,
-          refresh_token: '' 
+          refresh_token: ''
         });
-        if (error) {
-          console.error('[Auth] Bridge Failed:', error.message);
-        } else {
-          console.log('[Auth] Bridge Success!');
-          session = data.session;
+        if (!error && data?.session) {
+          console.log('[Auth] Bridge Success! Using Supabase session.');
+          updateAuthUI(data.session.user);
+          return;
         }
-      } else if (session) {
-        console.log('[Auth] Existing JS session found.');
-      } else {
-        console.warn('[Auth] No session found and no bridging token available.');
+        console.warn('[Auth] Bridge failed:', error?.message, '— falling back to PHP session data.');
       }
-      
-      updateAuthUI(session?.user || null);
+
+      // Final fallback: use PHP session data directly to render the UI
+      // This ensures the top bar shows correct info even without a Supabase JS session
+      if (window.PHP_SESSION?.user_id) {
+        console.log('[Auth] Using PHP session fallback for UI.');
+        const phpUser = {
+          id:    window.PHP_SESSION.user_id,
+          email: window.PHP_SESSION.email,
+          // Synthesize a profile so updateAuthUI can render name + role
+          _phpProfile: {
+            full_name: window.PHP_SESSION.full_name,
+            role:      window.PHP_SESSION.role,
+            status:    'active'
+          }
+        };
+        updateAuthUI(phpUser);
+        return;
+      }
+
+      // Truly no session
+      console.warn('[Auth] No session found anywhere.');
+      updateAuthUI(null);
     }
 
     function syncGreetingToIframe() {
