@@ -6,7 +6,6 @@ const supabase = window.supabase.createClient(
 );
 
 document.addEventListener('DOMContentLoaded', async () => {
-
   const requestStep = document.getElementById('requestStep');
   const resetStep   = document.getElementById('resetStep');
   const successStep = document.getElementById('successStep');
@@ -14,26 +13,32 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function showMsg(text, isError = false) {
     msgBox.textContent = text;
+    msgBox.style.color = isError ? '#ef4444' : '#10b981';
     msgBox.className = isError ? 'error' : 'success';
   }
 
-  // Detect PASSWORD_RECOVERY event from Supabase
-  supabase.auth.onAuthStateChange(async (event) => {
+  // 1. Initial State Check
+  // Supabase takes a moment to process hashes and trigger events.
+  // We check for the recovery code hash immediately.
+  const hash = window.location.hash;
+  if (hash && (hash.includes('type=recovery') || hash.includes('access_token='))) {
+    requestStep.classList.add('hidden');
+    resetStep.classList.remove('hidden');
+    showMsg('Recovery link detected. Please enter your new password.');
+  }
+
+  // 2. Listen for recovery events (Standard Supabase Flow)
+  supabase.auth.onAuthStateChange((event, session) => {
     if (event === 'PASSWORD_RECOVERY') {
+      console.log('User is in recovery mode');
       requestStep.classList.add('hidden');
       resetStep.classList.remove('hidden');
       successStep.classList.add('hidden');
-      msgBox.textContent = '';
+      showMsg('Session active. You can now reset your password.');
     }
   });
 
-  // Fallback: hash detection
-  if (window.location.hash && window.location.hash.includes('type=recovery')) {
-    requestStep.classList.add('hidden');
-    resetStep.classList.remove('hidden');
-  }
-
-  // ── Send reset link ──────────────────────────────────────────────────────────
+  // 3. ── Send reset link ──────────────────────────────────────────────────────────
   document.getElementById('sendBtn').onclick = async () => {
     const email = document.getElementById('email').value.trim();
     if (!email) return showMsg('Please enter your email', true);
@@ -42,7 +47,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
 
-    const resetPageUrl = window.location.href.split('?')[0].split('#')[0];
+    // The live URL where users will be sent back to
+    const resetPageUrl = window.location.origin + window.location.pathname;
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: resetPageUrl,
@@ -55,10 +61,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else {
       requestStep.classList.add('hidden');
       successStep.classList.remove('hidden');
+      showMsg(''); // Clear any previous errors
     }
   };
 
-  // ── Update password ──────────────────────────────────────────────────────────
+  // 4. ── Update password ──────────────────────────────────────────────────────────
   document.getElementById('resetBtn').onclick = async () => {
     const newPass     = document.getElementById('newPassword').value;
     const confirmPass = document.getElementById('confirmPassword').value;
@@ -70,6 +77,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
 
+    // This updates the password for the current recovery session user
     const { error } = await supabase.auth.updateUser({ password: newPass });
 
     if (error) {
@@ -81,7 +89,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       successStep.classList.remove('hidden');
       document.getElementById('successTitle').textContent = 'Password Updated';
       document.getElementById('successMessage').textContent =
-        'Your password has been successfully changed. You can now log in.';
+        'Your password has been successfully changed. You can now log in securely.';
+      showMsg('');
     }
   };
 });
