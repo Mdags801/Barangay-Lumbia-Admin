@@ -170,8 +170,11 @@
     // --- Authentication State Management ---
     let currentUserProfile = null;
     let presenceChannel = null;
+    let globalIncidentsChannel = null;
+    let profilesChannel = null;
     let presenceUIInitialized = false;
     let currentAuthSession = null;
+    let isPresenceStarting = false;
 
     async function updateAuthUI(user) {
       const userInfo = document.getElementById('user-info');
@@ -212,7 +215,12 @@
         signInBtn.style.display = 'none';
         signOutBtn.style.display = '';
         if (presenceFab) presenceFab.style.display = 'flex';
+        
+        // Only initialize once profile is ready
         initPresenceSystem();
+        initGlobalAlarm();
+        subscribeGlobalIncidents();
+        monitorAccountRequests();
 
         // Sync greeting to iframe if it's already loaded
         syncGreetingToIframe();
@@ -454,26 +462,12 @@
     }
 
     function subscribeGlobalIncidents() {
+      if (globalIncidentsChannel) return;
       console.log('[Alarm] Initializing Realtime listener for incidents...');
-      supabase.channel('global_incidents')
+      
+      globalIncidentsChannel = supabase.channel('global_incidents')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'incidents' }, payload => {
           const incident = payload.new;
-          const reportedAt = incident.reportedAt || incident.time || incident.created_at;
-
-          // --- Alert Security Guard ---
-          // Only trigger the loud siren alarm if the incident was reported in the last 60 seconds.
-          // This prevents the alarm from going off when restoring old incidents from the archive.
-          if (reportedAt) {
-            const timeParsed = new Date(reportedAt).getTime();
-            if (!isNaN(timeParsed)) {
-              const diffMs = Date.now() - timeParsed;
-              if (diffMs > 60000) {
-                console.log('[Alarm] Skipping siren for old/restored incident:', incident.id);
-                return;
-              }
-            }
-          }
-
           console.log('[Alarm] SIGNAL RECEIVED:', incident);
           alarmQueue.push(incident);
           if (!isShowingAlarm) showNextAlarm();
@@ -481,7 +475,7 @@
         .subscribe(status => {
           console.log('[Alarm] Subscription status:', status);
           if (status === 'CHANNEL_ERROR') {
-            console.error('[Alarm] Realtime subscription failed. Check Supabase Dashboard for Realtime settings.');
+             console.error('[Alarm] Realtime subscription failed. IMPORTANT: Check if Realtime is enabled for the "incidents" table in Supabase Dashboard -> Database -> Realtime.');
           }
         });
     }
@@ -728,50 +722,55 @@
       }).join('');
     }
 
-    let _presenceJoinPending = false;
     async function startPresenceTracking() {
-      if (_presenceJoinPending) return;
-      _presenceJoinPending = true;
+      if (isPresenceStarting || presenceChannel) return;
+      isPresenceStarting = true;
 
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session || !session.user) {
-          console.log('[Presence] No session found, skipping tracking');
-          _presenceJoinPending = false;
+          isPresenceStarting = false;
           return;
         }
 
-        if (presenceChannel) {
-          console.log('[Presence] Re-joining channel...');
-          await presenceChannel.unsubscribe();
-        }
-        
         currentAuthSession = session;
-        console.log('[Presence] Creating channel for:', session.user.id);
+        console.log('[Presence] Joining as:', session.user.id);
 
         presenceChannel = supabase.channel('app_presence', {
           config: { presence: { key: session.user.id } }
         });
 
+        const updateStatus = (status, error) => {
+          console.log(`[Presence] Status: ${status}`, error || '');
+          const statusIcon = document.getElementById('presenceStatusIcon');
+          const statusText = document.getElementById('presenceStatusText');
+          if (statusIcon && statusText) {
+             if (status === 'SUBSCRIBED') {
+                statusIcon.style.color = '#10b981';
+                statusText.textContent = 'Live Sync Active';
+             } else {
+                statusIcon.style.color = '#f59e0b';
+                statusText.textContent = `Connecting (${status})...`;
+             }
+          }
+        };
+
         presenceChannel
           .on('presence', { event: 'sync' }, () => {
-            const newState = presenceChannel.presenceState();
-            console.log('Synced state:', newState);
             renderActiveUsers();
           })
           .on('presence', { event: 'join' }, ({ newPresences }) => {
-            console.log('User joined:', newPresences);
+            console.log('[Presence] Join Event:', newPresences);
             renderActiveUsers();
           })
           .on('presence', { event: 'leave' }, ({ leftPresences }) => {
-            console.log('User left:', leftPresences);
+            console.log('[Presence] Leave Event:', leftPresences);
             renderActiveUsers();
           })
           .subscribe(async (status) => {
-            console.log('[Presence] Channel status:', status);
+            updateStatus(status);
             if (status === 'SUBSCRIBED') {
               try {
-                // Fetch latest profile for tracking - use maybeSingle so it doesn't throw if not found
                 const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
                 if (profile) currentUserProfile = profile;
 
@@ -785,20 +784,20 @@
                   platform: 'Web Portal'
                 };
 
-                console.log('[Presence] Tracking:', presenceData);
+                console.log('[Presence] Tracking payload:', presenceData);
                 await presenceChannel.track(presenceData);
               } catch (trackErr) {
-                console.error('[Presence] Error during tracking setup:', trackErr);
+                console.error('[Presence] Tracking error:', trackErr);
               }
-            }
-            if (status === 'CHANNEL_ERROR' || status === 'CLOSED') {
-               _presenceJoinPending = false;
+            } else if (status === 'CHANNEL_ERROR') {
+               console.error('[Presence] Failed. IMPORTANT: Go to Supabase -> Project Settings -> API. Check if Realtime is enabled.');
+               isPresenceStarting = false;
+               presenceChannel = null;
             }
           });
       } catch (err) {
-        console.error('[Presence] Join failed:', err);
-      } finally {
-        setTimeout(() => { _presenceJoinPending = false; }, 2000);
+        console.error('[Presence] Start error:', err);
+        isPresenceStarting = false;
       }
     }
 
@@ -946,6 +945,7 @@
 
     // --- Account Requests Monitor ---
     async function monitorAccountRequests() {
+      if (profilesChannel) return;
       const badge = document.getElementById('requests-badge');
       if (!badge) return;
 
@@ -967,10 +967,14 @@
       await updateBadge();
 
       // Real-time subscription
-      supabase
+      profilesChannel = supabase
         .channel('profiles-pending')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, updateBadge)
-        .subscribe();
+        .subscribe(status => {
+           if (status === 'CHANNEL_ERROR') {
+              console.error('[Badge] Failed. Check if Realtime is enabled for the "profiles" table.');
+           }
+        });
     }
 
     // --- Initialization ---
@@ -987,5 +991,4 @@
       initGlobalAlarm();
       subscribeGlobalIncidents();
       monitorAccountRequests();
-      initPresenceSystem();
     });
