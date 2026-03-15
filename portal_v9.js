@@ -202,12 +202,12 @@ console.log('%c [System] Core Version 9.0 (Isolated & Stable) ', 'background: #1
         currentUserProfile = data || { role: 'staff', full_name: user.email.split('@')[0] };
 
         const role = (currentUserProfile.role || 'staff').toLowerCase();
-        const status = (currentUserProfile.status || 'Active');
+        const status = (currentUserProfile.status || 'active').toLowerCase();
 
         // Security Gate: Citizens, Responders, or Suspended/Pending users cannot access the portal
-        if (role === 'citizen' || role === 'responder' || status === 'Suspended' || status === 'Pending') {
+        if (role === 'citizen' || role === 'responder' || status === 'suspended' || status === 'pending') {
           await supabase.auth.signOut();
-          const errorType = (status === 'Pending') ? 'pending_approval' : 'access_denied';
+          const errorType = (status === 'pending') ? 'pending_approval' : 'access_denied';
           window.location.href = `login.php?error=${errorType}`;
           return;
         }
@@ -272,7 +272,17 @@ console.log('%c [System] Core Version 9.0 (Isolated & Stable) ', 'background: #1
     }
 
     async function checkAuth() {
-      const { data: { session } } = await supabase.auth.getSession();
+      let { data: { session } } = await supabase.auth.getSession();
+      
+      // If JS session is missing but PHP has a token, set it manually
+      if (!session && window.PHP_SESSION?.access_token) {
+        const { data, error } = await supabase.auth.setSession({
+          access_token: window.PHP_SESSION.access_token,
+          refresh_token: '' // Handled by PHP side or ignored for now
+        });
+        if (!error) session = data.session;
+      }
+      
       updateAuthUI(session?.user || null);
     }
 
@@ -306,10 +316,9 @@ console.log('%c [System] Core Version 9.0 (Isolated & Stable) ', 'background: #1
 
     document.getElementById('confirmLogout').addEventListener('click', async function () {
       try {
-        // Destroy the server-side PHP session
-        const res = await fetch('api/logout.php', { method: 'POST' });
-        const data = await res.json();
-        window.location.href = data.redirect || 'login.php';
+        await supabase.auth.signOut(); // Clear JS session
+        await fetch('api/logout.php', { method: 'POST' }); // Clear PHP session
+        window.location.href = 'login.php';
       } catch (err) {
         showToast('Sign out failed. Please try again.', 'danger');
       }
@@ -498,10 +507,16 @@ console.log('%c [System] Core Version 9.0 (Isolated & Stable) ', 'background: #1
     }
 
     // --- Supabase Auth State Change Listener ---
-    supabase.auth.onAuthStateChange((_event, session) => {
+    supabase.auth.onAuthStateChange((event, session) => {
+      console.log('[Auth] State Change:', event);
       updateAuthUI(session?.user || null);
-      if (!session || !session.user) {
-        window.location.href = 'login.php';
+      
+      // Only redirect to login if we are explicitly SIGNED_OUT or have no session 
+      // AND we aren't already on the login page.
+      if (event === 'SIGNED_OUT' || (!session && event !== 'INITIAL_SESSION')) {
+        if (!window.location.pathname.includes('login.php')) {
+            window.location.href = 'login.php';
+        }
       }
     });
 
