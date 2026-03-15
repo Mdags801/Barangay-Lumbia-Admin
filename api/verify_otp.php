@@ -39,7 +39,7 @@ if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
 }
 if (empty($token) || !preg_match('/^\d{6}$/', $token)) {
     http_response_code(400);
-    echo json_encode(['error' => 'A valid 6-digit OTP code is required.']);
+    echo json_encode(['error' => 'A valid 6-digit verification code is required.']);
     exit;
 }
 
@@ -47,7 +47,7 @@ if (empty($token) || !preg_match('/^\d{6}$/', $token)) {
 $payload = json_encode([
     'email' => $email,
     'token' => $token,
-    'type'  => 'email',
+    'type'  => 'magiclink',
 ]);
 
 $ch = curl_init(SUPABASE_URL . '/auth/v1/verify');
