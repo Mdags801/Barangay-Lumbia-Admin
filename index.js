@@ -549,7 +549,7 @@
 
 
     function renderActiveUsers(state) {
-      console.log('[Presence] Rendering state:', state);
+      if (state) console.log('[Presence] Update received');
       const badge = document.getElementById('activeUsersBadge');
       const countEl = document.getElementById('activeUsersCount');
       const usersList = document.getElementById('activeUsersList');
@@ -597,7 +597,11 @@
         const myId = currentAuthSession.user.id;
         const myEmail = currentAuthSession.user.email;
         if (!uniqueUsersMap.has(myId) && !uniqueUsersMap.has(myEmail)) {
-           console.log('[Presence] Patching local user into display list');
+           // Only log once to avoid spamming
+           if (!window._presenceLastPatchTime || Date.now() - window._presenceLastPatchTime > 10000) {
+             console.log('[Presence] Local user not in sync yet, displaying locally...');
+             window._presenceLastPatchTime = Date.now();
+           }
            uniqueUsersMap.set(myId, {
              user_id: myId,
              email: myEmail,
@@ -784,13 +788,14 @@
                   platform: 'Web Portal'
                 };
 
-                console.log('[Presence] Tracking payload:', presenceData);
-                await presenceChannel.track(presenceData);
+                console.log('[Presence] Tracking payload initialized:', presenceData.name);
+                const trackResult = await presenceChannel.track(presenceData);
+                console.log('[Presence] Track request result:', trackResult);
               } catch (trackErr) {
                 console.error('[Presence] Tracking error:', trackErr);
               }
             } else if (status === 'CHANNEL_ERROR') {
-               console.error('[Presence] Failed. IMPORTANT: Go to Supabase -> Project Settings -> API. Check if Realtime is enabled.');
+               console.error('[Presence] Channel Error. Possible causes: 1. Realtime disabled in Dashboard. 2. Duplicate connection. 3. Network firewall.');
                isPresenceStarting = false;
                presenceChannel = null;
             }
