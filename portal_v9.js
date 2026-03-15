@@ -275,15 +275,26 @@ console.log('%c [System] Core Version 9.1 (Isolated & Stable) ', 'background: #1
     }
 
     async function checkAuth() {
+      console.log('[Auth] Checking session...');
       let { data: { session } } = await supabase.auth.getSession();
       
       // If JS session is missing but PHP has a token, set it manually
       if (!session && window.PHP_SESSION?.access_token) {
+        console.log('[Auth] Attempting to bridge PHP token...');
         const { data, error } = await supabase.auth.setSession({
           access_token: window.PHP_SESSION.access_token,
-          refresh_token: '' // Handled by PHP side or ignored for now
+          refresh_token: '' 
         });
-        if (!error) session = data.session;
+        if (error) {
+          console.error('[Auth] Bridge Failed:', error.message);
+        } else {
+          console.log('[Auth] Bridge Success!');
+          session = data.session;
+        }
+      } else if (session) {
+        console.log('[Auth] Existing JS session found.');
+      } else {
+        console.warn('[Auth] No session found and no bridging token available.');
       }
       
       updateAuthUI(session?.user || null);
