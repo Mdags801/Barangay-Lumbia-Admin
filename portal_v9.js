@@ -511,13 +511,8 @@ console.log('%c [System] Core Version 9.0 (Isolated & Stable) ', 'background: #1
       console.log('[Auth] State Change:', event);
       updateAuthUI(session?.user || null);
       
-      // Only redirect to login if we are explicitly SIGNED_OUT or have no session 
-      // AND we aren't already on the login page.
-      if (event === 'SIGNED_OUT' || (!session && event !== 'INITIAL_SESSION')) {
-        if (!window.location.pathname.includes('login.php')) {
-            window.location.href = 'login.php';
-        }
-      }
+      // We removed the JS-driven redirect here because session_guard.php 
+      // (PHP side) handles the security gate more reliably.
     });
 
     // --- Greeting on Dashboard via postMessage ---
