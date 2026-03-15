@@ -87,7 +87,7 @@
     </div>
   </main>
 
-  <script src="reset.js" defer></script>
+  <script src="reset.js?v=<?php echo time(); ?>" defer></script>
 
   <!-- Custom Alert Modal -->
   <div id="alertModal" class="custom-modal" role="alertdialog" aria-modal="true" aria-labelledby="alertTitle" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.7); backdrop-filter:blur(4px); z-index:10000; align-items:center; justify-content:center;">

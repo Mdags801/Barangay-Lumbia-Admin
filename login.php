@@ -102,6 +102,6 @@ $prefilledError = $errorMsgs[$errorParam] ?? '';
 
   <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
 
-  <script src="login.js" defer></script>
+  <script src="login.js?v=<?php echo time(); ?>" defer></script>
 </body>
 </html>

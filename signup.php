@@ -100,6 +100,6 @@
     </div>
   </div>
 
-  <script src="signup.js" defer></script>
+  <script src="signup.js?v=<?php echo time(); ?>" defer></script>
 </body>
 </html>

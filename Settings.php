@@ -80,7 +80,7 @@
 
   </div>
 
-  <script src="settings.js" defer></script>
+  <script src="settings.js?v=<?php echo time(); ?>" defer></script>
 </body>
 
 </html>
