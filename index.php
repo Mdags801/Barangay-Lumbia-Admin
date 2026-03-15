@@ -1,4 +1,7 @@
-<?php require_once __DIR__ . '/session_guard.php'; ?>
+<?php 
+// Portal Version 9.0.1 - Vercel Fix
+require_once __DIR__ . '/session_guard.php'; 
+?>
 <!DOCTYPE html>
 <html lang="en">
 
