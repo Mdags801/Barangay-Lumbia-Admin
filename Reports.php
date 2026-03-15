@@ -88,7 +88,7 @@
 
 <!-- Supabase JS -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="reports.js" defer></script>
+<script src="reports.js?v=<?php echo time(); ?>" defer></script>
 
 <!-- Custom Confirmation Modal -->
 <div id="confirmModal" class="custom-modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">

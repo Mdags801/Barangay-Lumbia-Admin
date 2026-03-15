@@ -44,7 +44,7 @@
 
   <!-- Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="archive.js" defer></script>
+  <script src="archive.js?v=<?php echo time(); ?>" defer></script>
 </body>
 
 </html>

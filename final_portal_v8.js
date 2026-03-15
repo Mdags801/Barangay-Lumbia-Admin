@@ -612,11 +612,11 @@ console.log('%c [System] Core Version 8.0 (Live & Secure) ', 'background: #b71c1
         const myId = currentAuthSession.user.id;
         const myEmail = currentAuthSession.user.email;
         if (!uniqueUsersMap.has(myId) && !uniqueUsersMap.has(myEmail)) {
-           // Only log once to avoid spamming
-           if (!window._presenceLastPatchTime || Date.now() - window._presenceLastPatchTime > 10000) {
-             console.log('[Presence] Local user not in sync yet, displaying locally...');
-             window._presenceLastPatchTime = Date.now();
-           }
+            // Only log once to avoid spamming
+            if (!window._presenceLastPatchTime || Date.now() - window._presenceLastPatchTime > 30000) {
+              console.log('%c [Presence] Local session lag detected, patching display... ', 'color: #f59e0b; font-weight: bold;');
+              window._presenceLastPatchTime = Date.now();
+            }
            uniqueUsersMap.set(myId, {
              user_id: myId,
              email: myEmail,
@@ -808,9 +808,12 @@ console.log('%c [System] Core Version 8.0 (Live & Secure) ', 'background: #b71c1
                   platform: 'Web Portal'
                 };
 
-                console.log('[Presence] Tracking payload initialized:', presenceData.name);
-                const trackResult = await presenceChannel.track(presenceData);
-                console.log('[Presence] Track request result:', trackResult);
+                if (!window._lastPresenceTrackTime || Date.now() - window._lastPresenceTrackTime > 5000) {
+                  console.log('%c [Presence] Syncing identity: ' + presenceData.name + ' ', 'color: #10b981; font-weight: bold;');
+                  window._lastPresenceTrackTime = Date.now();
+                  const trackResult = await presenceChannel.track(presenceData);
+                  if (trackResult !== 'ok') console.warn('[Presence] Track failed:', trackResult);
+                }
               } catch (trackErr) {
                 console.error('[Presence] Tracking error:', trackErr);
               }
@@ -839,19 +842,22 @@ console.log('%c [System] Core Version 8.0 (Live & Secure) ', 'background: #b71c1
             drawer.classList.add('open'); 
             overlay.classList.add('open'); 
             drawer.style.visibility = 'visible';
-            drawer.setAttribute('aria-hidden', 'false');
-            // Force a render when opening to ensure local user shows up
+            drawer.removeAttribute('aria-hidden'); // Remove aria-hidden when visible
+            const closeBtn = document.getElementById('closeActiveDrawer');
+            if (closeBtn) closeBtn.focus(); // Focus management
             renderActiveUsers(); 
           };
           closeBtn.onclick = overlay.onclick = () => { 
             drawer.classList.remove('open'); 
             overlay.classList.remove('open'); 
+            const fab = document.getElementById('activeUsersBtn');
+            if (fab) fab.focus(); // Return focus to trigger
             setTimeout(() => {
               if (!drawer.classList.contains('open')) {
                 drawer.style.visibility = 'hidden';
                 drawer.setAttribute('aria-hidden', 'true');
               }
-            }, 400); // Wait for transition
+            }, 400); 
           };
           
           if (searchInput) {

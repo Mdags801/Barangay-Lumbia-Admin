@@ -60,6 +60,6 @@
     <img id="idLargeImage" src="" alt="ID Full View">
   </div>
 
-  <script src="account_requests.js" defer></script>
+  <script src="account_requests.js?v=<?php echo time(); ?>" defer></script>
 </body>
 </html>
