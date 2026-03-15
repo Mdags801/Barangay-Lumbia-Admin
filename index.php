@@ -141,8 +141,8 @@
 
 
 
-  <!-- System Core (v8.0 - Nuclear Refresh) -->
-  <script src="final_portal_v8.js?cache=<?php echo bin2hex(random_bytes(8)); ?>"></script>
+  <!-- System Core (v9.0 - Final Stability) -->
+  <script src="portal_v9.js?v=<?php echo time(); ?>"></script>
 
   <!-- ===== ACTIVE USERS FLOATING BUTTON ===== -->
   <button id="activeUsersBtn" class="active-users-fab" aria-label="Show active users" title="Active Users">

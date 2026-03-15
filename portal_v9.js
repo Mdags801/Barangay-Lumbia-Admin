@@ -1,5 +1,5 @@
-/* final_portal_v8.js — Version 8.0 (Security & Performance Build) */
-console.log('%c [System] Core Version 8.0 (Live & Secure) ', 'background: #b71c1c; color: #fff; padding: 6px; border-radius: 4px; font-weight: bold; font-size: 14px;');
+/* portal_v9.js — Version 9.0 (Stability & Cache-Force Build) */
+console.log('%c [System] Core Version 9.0 (Isolated & Stable) ', 'background: #1e3a8a; color: #fff; padding: 6px; border-radius: 4px; font-weight: bold; font-size: 14px;');
 
 // --- Supabase Initialization ---
     const SUPABASE_URL = 'https://tukkkwtxuaxrbihyammp.supabase.co';
@@ -480,7 +480,7 @@ console.log('%c [System] Core Version 8.0 (Live & Secure) ', 'background: #b71c1
       if (globalIncidentsChannel) return;
       console.log('[Alarm] Initializing Realtime listener for incidents...');
       
-      globalIncidentsChannel = supabase.channel('global_incidents')
+      globalIncidentsChannel = supabase.channel('global_incidents_v9')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'incidents' }, payload => {
           const incident = payload.new;
           console.log('[Alarm] SIGNAL RECEIVED:', incident);
@@ -614,7 +614,7 @@ console.log('%c [System] Core Version 8.0 (Live & Secure) ', 'background: #b71c1
         if (!uniqueUsersMap.has(myId) && !uniqueUsersMap.has(myEmail)) {
             // Only log once to avoid spamming
             if (!window._presenceLastPatchTime || Date.now() - window._presenceLastPatchTime > 30000) {
-              console.log('%c [Presence] Local session lag detected, patching display... ', 'color: #f59e0b; font-weight: bold;');
+              console.log('%c [Presence v9] Local session lag detected, patching display... ', 'color: #f59e0b; font-weight: bold;');
               window._presenceLastPatchTime = Date.now();
             }
            uniqueUsersMap.set(myId, {
@@ -758,9 +758,9 @@ console.log('%c [System] Core Version 8.0 (Live & Secure) ', 'background: #b71c1
         }
 
         currentAuthSession = session;
-        console.log('[Presence] Joining as:', session.user.id);
+        console.log('[Presence v9] Joining as:', session.user.id);
 
-        presenceChannel = supabase.channel('app_presence', {
+        presenceChannel = supabase.channel('app_presence_v9', {
           config: { presence: { key: session.user.id } }
         });
 
@@ -842,9 +842,9 @@ console.log('%c [System] Core Version 8.0 (Live & Secure) ', 'background: #b71c1
             drawer.classList.add('open'); 
             overlay.classList.add('open'); 
             drawer.style.visibility = 'visible';
-            drawer.removeAttribute('aria-hidden'); // Remove aria-hidden when visible
+            drawer.setAttribute('aria-hidden', 'false'); // Set to false explicitly
             const closeBtn = document.getElementById('closeActiveDrawer');
-            if (closeBtn) closeBtn.focus(); // Focus management
+            if (closeBtn) setTimeout(() => closeBtn.focus(), 50); // Delayed focus for DOM update
             renderActiveUsers(); 
           };
           closeBtn.onclick = overlay.onclick = () => { 
