@@ -1,10 +1,10 @@
 {
   "cleanUrls": true,
   "trailingSlash": false,
-  "functions": {
-    "api/*.php": { "runtime": "vercel-php@0.6.0" },
-    "*.php": { "runtime": "vercel-php@0.6.0" }
-  },
+  "builds": [
+    { "src": "api/*.php", "use": "vercel-php@0.6.0" },
+    { "src": "*.php", "use": "vercel-php@0.6.0" }
+  ],
   "rewrites": [
     { "source": "/", "destination": "/index.php" },
     { "source": "/api/(.*)", "destination": "/api/$1.php" },
