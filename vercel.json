@@ -1,14 +1,26 @@
 {
-  "cleanUrls": true,
-  "functions": {
-    "**/*.php": {
-      "runtime": "vercel-php@0.9.0"
-    }
-  },
+  "version": 2,
+  "builds": [
+    { "src": "index.php", "use": "vercel-php@0.7.1" },
+    { "src": "login.php", "use": "vercel-php@0.7.1" },
+    { "src": "signup.php", "use": "vercel-php@0.7.1" },
+    { "src": "reset.php", "use": "vercel-php@0.7.1" },
+    { "src": "vercel-debug.php", "use": "vercel-php@0.7.1" },
+    { "src": "api/*.php", "use": "vercel-php@0.7.1" },
+    { "src": "libs/*.php", "use": "vercel-php@0.7.1" },
+    { "src": "**/*.css", "use": "@vercel/static" },
+    { "src": "**/*.js", "use": "@vercel/static" },
+    { "src": "**/*.png", "use": "@vercel/static" },
+    { "src": "**/*.jpg", "use": "@vercel/static" },
+    { "src": "**/*.svg", "use": "@vercel/static" },
+    { "src": "**/*.ico", "use": "@vercel/static" }
+  ],
   "routes": [
-    {
-      "src": "/(config|session_guard|vercel).json",
-      "status": 403
-    }
+    { "src": "/(config|session_guard|vercel).json", "status": 403 },
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/login", "dest": "/login.php" },
+    { "src": "/signup", "dest": "/signup.php" },
+    { "src": "/reset", "dest": "/reset.php" },
+    { "src": "/", "dest": "/index.php" }
   ]
 }
