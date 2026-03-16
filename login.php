@@ -5,13 +5,13 @@
  */
 require_once __DIR__ . '/config.php';
 
-session_set_cookie_params([
-    'lifetime' => SESSION_LIFETIME,
-    'path'     => '/',
-    'secure'   => SESSION_COOKIE_SECURE,
-    'httponly' => true,
-    'samesite' => SESSION_COOKIE_SAMESITE,
-]);
+// session_set_cookie_params([
+//     'lifetime' => SESSION_LIFETIME,
+//     'path'     => '/',
+//     'secure'   => SESSION_COOKIE_SECURE,
+//     'httponly' => true,
+//     'samesite' => SESSION_COOKIE_SAMESITE,
+// ]);
 if (session_status() === PHP_SESSION_NONE) session_start();
 
 if (!empty($_SESSION['user_id']) && !empty($_SESSION['role']) && empty($_GET['error'])) {

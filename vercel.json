@@ -9,6 +9,18 @@
     {
       "src": "/(config|session_guard|vercel).json",
       "status": 403
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/",
+      "dest": "/index.php"
+    },
+    {
+      "src": "/login",
+      "dest": "/login.php"
     }
   ]
 }
