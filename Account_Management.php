@@ -1,3 +1,4 @@
+<?php require_once __DIR__ . '/session_guard.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -34,6 +35,7 @@
         style="padding: 10px 14px; border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; background:rgba(255,255,255,0.08); color:#fff; cursor: pointer; outline:none;">
         <option value="all" style="color:#0f172a;">All Status</option>
         <option value="Active" style="color:#0f172a;">Active</option>
+        <option value="Pending" style="color:#0f172a;">Pending</option>
         <option value="Suspended" style="color:#0f172a;">Suspended</option>
         <option value="Archived" style="color:#0f172a;">Archived</option>
       </select>

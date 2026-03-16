@@ -92,7 +92,7 @@ const SUPABASE_URL = "https://tukkkwtxuaxrbihyammp.supabase.co";
           </td>
           <td><span class="role-badge role-${(user.role || 'citizen').toLowerCase()}">${user.role || 'citizen'}</span></td>
           <td>
-            <span style="color: ${status === 'Active' ? 'var(--success)' : status === 'Suspended' ? 'var(--danger)' : 'var(--secondary)'}; font-size:13px;">
+            <span style="color: ${status === 'Active' ? 'var(--success)' : status === 'Suspended' ? 'var(--danger)' : status === 'Pending' ? '#f59e0b' : 'var(--secondary)'}; font-size:13px;">
               <i class="fas fa-circle" style="font-size:8px;"></i> ${status}
             </span>
           </td>
