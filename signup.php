@@ -23,9 +23,9 @@
       <section class="auth-form" aria-label="Sign up form">
         <div class="brand">
           <div class="logo">BD</div>
-          <div>
-            <div style="font-weight:800">Barangay Based Emergency Response System</div>
-            <div class="small">Create an admin account</div>
+          <div class="brand-text">
+            <div class="brand-title">Barangay Based Emergency Response System</div>
+            <div class="brand-sub">Create an admin account</div>
           </div>
         </div>
 
@@ -61,7 +61,9 @@
 
           <div class="actions">
             <button id="createBtn" class="btn-primary" type="submit">Verify Email &amp; Create Account</button>
-            <button id="backLogin" class="btn-ghost" type="button">Back to login</button>
+            <div class="secondary-actions">
+              <button id="backLogin" class="btn-ghost" type="button">Back to login</button>
+            </div>
           </div>
         </form>
 

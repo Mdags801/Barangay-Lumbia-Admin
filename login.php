@@ -46,8 +46,8 @@ $prefilledError = $errorMsgs[$errorParam] ?? '';
         <div class="brand">
           <div class="logo">BD</div>
           <div>
-            <div style="font-weight:800">Barangay Based Emergency Response System</div>
-            <div class="small">Admin Portal</div>
+            <div class="brand-text-title">Barangay Based Emergency Response System</div>
+            <div class="brand-text-sub">Admin Portal</div>
           </div>
         </div>
 
@@ -55,7 +55,7 @@ $prefilledError = $errorMsgs[$errorParam] ?? '';
         <p class="lead">Welcome back!</p>
 
         <?php if ($prefilledError): ?>
-        <div id="msg" aria-live="polite" style="margin-bottom:12px;color:#b00020;font-size:.9rem;">
+        <div id="prefill-error" aria-live="polite" class="error" style="margin-bottom:12px;">
           <?= $prefilledError ?>
         </div>
         <?php endif; ?>
@@ -80,18 +80,15 @@ $prefilledError = $errorMsgs[$errorParam] ?? '';
         </div>
 
         <div class="actions">
-          <!-- OTP Buttons -->
+          <!-- Primary action buttons (only one visible at a time) -->
           <button id="sendOtpBtn" class="btn-primary">Send OTP Code</button>
-          <button id="verifyOtpBtn" class="btn-primary" style="display:none;background:#10b981;">Verify &amp; Log In</button>
-          
-          <!-- Password Button -->
+          <button id="verifyOtpBtn" class="btn-primary" style="display:none;background:linear-gradient(135deg,#10b981,#059669);">Verify &amp; Log In</button>
           <button id="passwordLoginBtn" class="btn-primary" style="display:none;">Log In with Password</button>
-          
-          <button id="toggleLoginMode" class="btn-ghost" style="margin-top:8px;font-size:0.85rem;color:#6b7280;" type="button">
-            Use password instead
-          </button>
-          
-          <button id="toSignup"  class="btn-ghost" type="button" style="margin-top:0;">Create an account</button>
+
+          <div class="actions-divider">or</div>
+
+          <button id="toggleLoginMode" class="btn-ghost" type="button">Use password instead</button>
+          <button id="toSignup" class="btn-ghost" type="button">Create an account</button>
         </div>
 
         <div id="msg" aria-live="polite" style="margin-top:12px"></div>
