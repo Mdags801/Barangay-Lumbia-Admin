@@ -1,3 +1,4 @@
+<?php require_once __DIR__ . '/session_guard.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -157,22 +158,8 @@
       <div class="modal-content agency-selector">
         <span class="close" title="Close" id="closeAgencyModal">&times;</span>
         <h2><i class="fas fa-bullhorn"></i> Notify & Dispatch Responders</h2>
-        <p style="color: #64748b; margin-bottom: 20px;">Choose who to notify for this emergency.</p>
-
         <div class="agency-grid">
-          <div class="agency-card" data-agency="PNP">
-            <i class="fas fa-shield-halved"></i>
-            <span>PNP (Police)</span>
-          </div>
-          <div class="agency-card" data-agency="BFP">
-            <i class="fas fa-fire-flame-curved"></i>
-            <span>BFP (Fire)</span>
-          </div>
-          <div class="agency-card" data-agency="Medical">
-            <i class="fas fa-ambulance"></i>
-            <span>Ambulance/911</span>
-          </div>
-          <div class="agency-card" data-agency="Responders">
+          <div class="agency-card selected" data-agency="Responders">
             <i class="fas fa-users-rectangle"></i>
             <span>Bgy Responders</span>
             <small style="font-size: 0.7rem; color: var(--accent); font-weight: 700;">(Alert App)</small>
@@ -188,7 +175,7 @@
         </div>
 
         <div style="margin-top: 24px; text-align: right;">
-          <button class="btn resolve-btn" id="confirmDispatchBtn" disabled>Send Alerts</button>
+          <button class="btn resolve-btn" id="confirmDispatchBtn">Send Alerts</button>
         </div>
       </div>
     </div>

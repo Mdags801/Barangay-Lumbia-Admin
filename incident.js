@@ -772,26 +772,51 @@ if (archiveBtn) {
 let selectedAgencies = [];
 
 async function loadDispatchHistory(incidentId) {
-  const { data, error } = await supabaseClient
+  // Try by the provided ID (could be UUID or numeric)
+  let { data, error } = await supabaseClient
     .from('notifications')
     .select('*')
     .eq('incidentId', incidentId)
     .order('timestamp', { ascending: false });
 
+  // If no data, try to find the alternate ID and check that too
+  if (!error && (!data || data.length === 0)) {
+    const inc = allIncidents.find(r => (r.id === incidentId || r.incidentId === incidentId));
+    if (inc) {
+      const altId = (inc.id === incidentId) ? inc.incidentId : inc.id;
+      if (altId) {
+        const { data: dataAlt } = await supabaseClient
+          .from('notifications')
+          .select('*')
+          .eq('incidentId', altId)
+          .order('timestamp', { ascending: false });
+        if (dataAlt && dataAlt.length > 0) data = dataAlt;
+      }
+    }
+  }
+
   if (data && data.length > 0) {
-    historyList.innerHTML = data.map(n =>
-      `<div style="margin-bottom:4px;">â€¢ [${new Date(n.timestamp).toLocaleTimeString()}] ${n.message}</div>`
-    ).join('');
+    historyList.innerHTML = data.map(n => {
+      const time = new Date(n.timestamp).toLocaleString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      return `<div style="margin-bottom:6px; border-bottom:1px solid #f1f5f9; padding-bottom:4px;">
+                <span style="font-weight:700; color:#1e293b; font-size:0.75rem;">[${time}]</span> ${escapeHtml(n.message)}
+              </div>`;
+    }).join('');
   } else {
-    historyList.innerHTML = "No agencies notified yet.";
+    historyList.innerHTML = `<div style="text-align:center; padding:10px; opacity:0.6;">No agencies notified yet.</div>`;
   }
 }
 
 if (openAgencyBtn) {
   openAgencyBtn.onclick = () => {
-    selectedAgencies = [];
-    agencyCards.forEach(c => c.classList.remove('selected'));
-    confirmDispatchBtn.disabled = true;
+    // DEFAULT: Select Responders
+    selectedAgencies = ['Responders'];
+    agencyCards.forEach(c => {
+      if (c.dataset.agency === 'Responders') c.classList.add('selected');
+      else c.classList.remove('selected');
+    });
+    
+    confirmDispatchBtn.disabled = false;
     agencyModal.style.display = "flex";
     loadDispatchHistory(currentDocId);
   };
