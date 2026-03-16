@@ -623,15 +623,26 @@ console.log('%c [System] Core Version 9.1 (Isolated & Stable) ', 'background: #1
       const searchInput = document.getElementById('presenceSearch');
       if (!badge || !countEl || !usersList) return;
 
-      // Read from the Presence state
-      const state = presenceChannel.presenceState();
-      const users = [];
-      
-      // Presence state is an object where keys are IDs and values are arrays of presence objects
-      Object.keys(state).forEach(uuid => {
-        state[uuid].forEach(presence => {
-          users.push(presence);
-        });
+      // Read from the broadcastUsers Map
+      const allUsers = Array.from(broadcastUsers.values());
+      const viewerRole = (currentUserProfile?.role || 'staff').toLowerCase();
+
+      // Visibility Rules:
+      // 1. Admin/Staff cannot see Super Admin
+      // 2. Super Admin can see everyone (including other Super Admins)
+      const users = allUsers.filter(u => {
+        const targetRole = (u.role || 'citizen').toLowerCase();
+        
+        // Show myself always
+        const isMe = currentAuthSession && (u.user_id === currentAuthSession.user.id || u.email === currentAuthSession.user.email);
+        if (isMe) return true;
+
+        // Restriction: Admin & Staff cannot see Super Admin
+        if ((viewerRole === 'admin' || viewerRole === 'staff') && targetRole === 'super admin') {
+          return false;
+        }
+
+        return true;
       });
 
       const count = users.length;
@@ -677,6 +688,7 @@ console.log('%c [System] Core Version 9.1 (Isolated & Stable) ', 'background: #1
       const ROLE_CONFIG = {
         'Super Admin': { color: '#6d28d9', icon: 'shield-check', bg: '#f5f3ff' },
         'Admin': { color: '#2563eb', icon: 'shield-alt', bg: '#eff6ff' },
+        'Staff': { color: '#0ea5e9', icon: 'user-tie', bg: '#f0f9ff' },
         'Responder': { color: '#f59e0b', icon: 'truck-medical', bg: '#fffbeb' },
         'Citizen': { color: '#10b981', icon: 'user', bg: '#ecfdf5' },
         'Default': { color: '#64748b', icon: 'user', bg: '#f8fafc' }
@@ -783,8 +795,14 @@ console.log('%c [System] Core Version 9.1 (Isolated & Stable) ', 'background: #1
           platform: 'Web Portal'
         };
 
-        // Join the standard 'app_presence' channel used by both Web and Mobile apps
-        presenceChannel = supabase.channel('app_presence');
+        // Add myself immediately (optimistic UI)
+        broadcastUsers.set(myData.user_id, { ...myData, is_me: true });
+        renderActiveUsers();
+
+        // Use Broadcast channel (simpler & more reliable than Presence API)
+        presenceChannel = supabase.channel('app_broadcast_v1', {
+          config: { broadcast: { self: false } }
+        });
 
         const updateStatus = (status) => {
           console.log(`[Presence] Status: ${status}`);
@@ -804,24 +822,53 @@ console.log('%c [System] Core Version 9.1 (Isolated & Stable) ', 'background: #1
           }
         };
 
+        // Track who we've already replied to - prevents infinite reply loops
+        const repliedTo = new Set();
+
         presenceChannel
-          .on('presence', { event: 'sync' }, () => {
-            console.log('[Presence] 🔄 State synced');
+          // Someone came online
+          .on('broadcast', { event: 'user_online' }, ({ payload }) => {
+            if (!payload?.user_id) return;
+            const isNewUser = !broadcastUsers.has(payload.user_id);
+            broadcastUsers.set(payload.user_id, payload);
+            
+            // Only reply ONCE when a new user appears so they know we exist
+            // (Don't reply to heartbeat updates from known users - that would cause an infinite loop)
+            if (isNewUser && !repliedTo.has(payload.user_id)) {
+              repliedTo.add(payload.user_id);
+              console.log('[Broadcast] ✅ New user online:', payload.name, '- announcing self back');
+              presenceChannel.send({ type: 'broadcast', event: 'user_online', payload: myData });
+            }
             renderActiveUsers();
           })
-          .on('presence', { event: 'join' }, ({ key, newPresences }) => {
-            console.log('[Presence] 🟢 Joined:', newPresences);
-            renderActiveUsers();
-          })
-          .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
-            console.log('[Presence] 🔴 Left:', leftPresences);
+          // Someone went offline
+          .on('broadcast', { event: 'user_offline' }, ({ payload }) => {
+            if (!payload?.user_id) return;
+            console.log('[Broadcast] ❌ User offline:', payload.user_id);
+            broadcastUsers.delete(payload.user_id);
+            repliedTo.delete(payload.user_id); // Allow re-reply if they come back
             renderActiveUsers();
           })
           .subscribe(async (status) => {
             updateStatus(status);
             if (status === 'SUBSCRIBED') {
-              console.log('%c [Presence] Tracking self: ' + myData.name, 'color: #10b981; font-weight: bold;');
-              await presenceChannel.track(myData);
+              // Announce ourselves to the channel
+              console.log('%c [Presence] Broadcasting self: ' + myData.name, 'color: #10b981; font-weight: bold;');
+              await presenceChannel.send({ type: 'broadcast', event: 'user_online', payload: myData });
+
+              // Heartbeat every 15s (so new joiners discover us within 15s)
+              heartbeatInterval = setInterval(async () => {
+                await presenceChannel.send({
+                  type: 'broadcast',
+                  event: 'user_online',
+                  payload: { ...myData, online_at: new Date().toISOString() }
+                });
+              }, 15000);
+
+              // Announce offline when the tab closes
+              window.addEventListener('beforeunload', async () => {
+                await presenceChannel.send({ type: 'broadcast', event: 'user_offline', payload: { user_id: myData.user_id } });
+              });
             }
           });
 
