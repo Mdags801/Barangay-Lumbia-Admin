@@ -1,6 +1,18 @@
-/* ==========================================
-   ALARM BANNER – New Citizen Incident Alert
-   ========================================== */
+:root {
+  --primary: #2563eb;
+  --primary-glow: rgba(37, 99, 235, 0.4);
+  --secondary: #64748b;
+  --accent: #f59e0b;
+  --success: #10b981;
+  --danger: #ef4444;
+  --info: #3b82f6;
+  --bg-main: #f8fafc;
+  --bg-card: rgba(255, 255, 255, 0.85);
+  --border-glass: rgba(255, 255, 255, 0.5);
+  --shadow-premium: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  --radius-premium: 20px;
+  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
 .alarm-banner {
   position: fixed;
@@ -581,34 +593,70 @@ header {
 
 /* Shared Buttons */
 .btn {
-  padding: 6px 14px;
+  padding: 10px 20px;
   border: none;
-  border-radius: 4px;
+  border-radius: 12px;
   cursor: pointer;
-  font-weight: bold;
-  transition: background 0.3s, transform 0.1s;
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: var(--transition-smooth);
+  box-shadow: var(--shadow-premium);
 }
 
 .btn:active {
-  transform: scale(0.95);
+  transform: scale(0.96);
+}
+
+.btn.primary {
+  background: var(--primary);
+  color: #fff;
+}
+
+.btn.primary:hover {
+  background: #1d4ed8;
+  box-shadow: 0 10px 15px -3px var(--primary-glow);
+  transform: translateY(-2px);
 }
 
 .btn.save {
-  background: #2ecc71;
+  background: var(--success);
   color: #fff;
 }
 
 .btn.save:hover {
-  background: #27ae60;
+  background: #059669;
+  box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3);
+  transform: translateY(-2px);
 }
 
 .btn.export {
-  background: #3498db;
+  background: #1e293b;
   color: #fff;
 }
 
 .btn.export:hover {
-  background: #2980b9;
+  background: #0f172a;
+  transform: translateY(-2px);
+}
+
+/* Premium Utility Classes */
+.premium-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-premium);
+  box-shadow: var(--shadow-premium);
+  padding: 24px;
+  transition: var(--transition-smooth);
+}
+
+.premium-card:hover {
+  border-color: rgba(37, 99, 235, 0.2);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 /* Custom GUI Modals */

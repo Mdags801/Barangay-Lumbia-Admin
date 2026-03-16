@@ -1,19 +1,19 @@
 :root {
-  --sidebar-width: 240px;
-  --sidebar-bg: #1a2233;
-  --sidebar-active-bg: #27304a;
-  --sidebar-link-color: #cfd8dc;
+  --sidebar-width: 260px;
+  --sidebar-bg: #0f172a;
+  --sidebar-active-bg: rgba(255, 255, 255, 0.08);
+  --sidebar-link-color: #94a3b8;
   --sidebar-link-active: #fff;
-  --primary: #1976d2;
-  --primary-dark: #115293;
-  --topbar-bg: #fff;
-  --topbar-border: #e0e0e0;
-  --clock-color: #1976d2;
-  --body-bg: #f4f6fa;
-  --transition: 0.2s cubic-bezier(.4, 0, .2, 1);
-  --shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  --radius: 8px;
-  --font: 'Inter', Arial, sans-serif;
+  --primary: #2563eb;
+  --primary-dark: #1e40af;
+  --topbar-bg: rgba(255, 255, 255, 0.85);
+  --topbar-border: rgba(0, 0, 0, 0.05);
+  --clock-color: #2563eb;
+  --body-bg: #f8fafc;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --radius: 16px;
+  --font: 'Inter', -apple-system, sans-serif;
 }
 
 html,
@@ -58,14 +58,23 @@ nav[aria-label="Sidebar"] {
 .sidebar-header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  height: 64px;
-  font-size: 1.35rem;
-  font-weight: 600;
-  letter-spacing: 1px;
+  padding: 0 24px;
+  height: 80px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
   color: #fff;
-  background: var(--primary);
-  border-bottom: 1px solid #223;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.05), transparent);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.sidebar-header i {
+  font-size: 1.8rem;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 8px rgba(37, 99, 235, 0.4));
 }
 
 .sidebar-nav {
@@ -79,41 +88,40 @@ nav[aria-label="Sidebar"] {
 .sidebar-link {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 12px 32px;
+  gap: 12px;
+  padding: 12px 24px;
+  margin: 2px 12px;
   color: var(--sidebar-link-color);
   text-decoration: none;
-  font-size: 1rem;
-  border-left: 4px solid transparent;
-  transition: background var(--transition), color var(--transition), border-color var(--transition);
-  border-radius: 0 20px 20px 0;
+  font-size: 0.92rem;
+  font-weight: 500;
+  border-radius: 12px;
+  transition: var(--transition);
   outline: none;
 }
 
-.sidebar-link:focus {
-  background: #26304a;
+.sidebar-link:hover {
+  background: rgba(255, 255, 255, 0.05);
   color: #fff;
+  transform: translateX(4px);
+}
+
+.sidebar-link:focus-visible {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 2px var(--primary);
 }
 
 .sidebar-link.active,
 .sidebar-link[aria-current="page"] {
-  background: var(--sidebar-active-bg);
-  color: var(--sidebar-link-active);
-  border-left: 4px solid var(--primary);
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  color: #fff;
   font-weight: 600;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
-.requests-badge {
-  background: #ff4757;
+.sidebar-link.active i,
+.sidebar-link[aria-current="page"] i {
   color: #fff;
-  font-size: 0.75rem;
-  font-weight: 800;
-  padding: 2px 8px;
-  border-radius: 12px;
-  margin-left: auto;
-  min-width: 18px;
-  text-align: center;
-  box-shadow: 0 4px 6px -1px rgba(255, 71, 87, 0.4);
 }
 
 .sidebar-link i {
@@ -124,27 +132,28 @@ nav[aria-label="Sidebar"] {
 
 .sidebar-footer {
   margin-top: auto;
-  padding: 16px 32px;
-  font-size: 0.95em;
-  color: #90a4ae;
-  border-top: 1px solid #223;
+  padding: 24px;
+  font-size: 0.75rem;
+  color: #475569;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  text-align: center;
 }
 
 /* Topbar */
 header[role="banner"] {
   margin-left: var(--sidebar-width);
-  height: 64px;
+  height: 80px;
   background: var(--topbar-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--topbar-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 32px;
+  padding: 0 40px;
   position: sticky;
   top: 0;
   z-index: 90;
-  box-shadow: var(--shadow);
-  transition: margin-left var(--transition);
 }
 
 .topbar-left {

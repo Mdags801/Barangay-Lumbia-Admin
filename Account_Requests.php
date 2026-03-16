@@ -1,3 +1,4 @@
+<?php require_once __DIR__ . '/session_guard.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,6 +23,18 @@
       </button>
     </header>
 
+    <!-- Stats Summary Section -->
+    <section style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 32px;">
+      <div style="background:white; padding:24px; border-radius:20px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.02); display:flex; flex-direction:column; gap:8px;">
+        <span style="font-size:0.75rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.05em;">PENDING VERIFICATION</span>
+        <span id="pendingCount" style="font-size:2rem; font-weight:900; color:#2563eb;">0</span>
+      </div>
+      <div style="background:white; padding:24px; border-radius:20px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.02); display:flex; flex-direction:column; gap:8px;">
+        <span style="font-size:0.75rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.05em;">TOTAL SUBMISSIONS</span>
+        <span id="totalCount" style="font-size:2rem; font-weight:900; color:#0f172a;">0</span>
+      </div>
+    </section>
+
     <div class="controls-container">
       <div class="search-box">
         <i class="fas fa-search"></i>
@@ -45,12 +58,14 @@
     </div>
 
     <!-- Troubleshooting Section -->
-    <div style="margin-top: 60px; padding: 24px; background: #eef2ff; border-radius: 16px; border: 1px solid #e0e7ff;">
-      <h3 style="margin-top:0; color: #1e40af; font-size: 1rem;"><i class="fas fa-lightbulb"></i> Troubleshooting</h3>
-      <ul style="font-size: 0.85rem; color: #475569; line-height: 1.6; margin-bottom:0;">
-        <li><strong>Not seeing any requests?</strong> Ensure users are signing up with the correct app version.</li>
-        <li><strong>ID Images not loading?</strong> Make sure your <code>identities</code> storage bucket in Supabase is set to <strong>Public</strong>.</li>
-        <li><strong>RLS Policy:</strong> Ensure your <code>profiles</code> table has a policy allowing Admins to <code>SELECT</code> and <code>UPDATE</code> all rows.</li>
+    <div style="margin-top: 60px; padding: 32px; background: #eef2ff; border-radius: 20px; border: 1px solid #e0e7ff; box-shadow: 0 10px 25px rgba(37, 99, 235, 0.05);">
+      <h3 style="margin-top:0; color: #1e40af; font-size: 1.1rem; font-weight: 800; display:flex; align-items:center; gap:10px;">
+        <i class="fas fa-lightbulb"></i> SYSTEM GUIDELINES
+      </h3>
+      <ul style="font-size: 0.9rem; color: #475569; line-height: 1.8; margin-bottom:0; padding-left:20px;">
+        <li>Review registration details carefully before approving access.</li>
+        <li>Ensure the uploaded ID image is clear and matches the registrant's name.</li>
+        <li>Approved personnel will receive immediate access to their respective portal/apps.</li>
       </ul>
     </div>
   </div>

@@ -1,15 +1,17 @@
 /* account_requests.css */
 
 :root {
-      --primary: #1e40af;
-      --secondary: #64748b;
-      --success: #10b981;
-      --warning: #f59e0b;
-      --danger: #ef4444;
-      --bg: #f8fafc;
-      --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-      --hover-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    }
+  --primary: #2563eb;
+  --primary-glow: rgba(37, 99, 235, 0.4);
+  --secondary: #64748b;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --bg: #f8fafc;
+  --radius-lg: 24px;
+  --shadow-premium: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
     body {
       background: var(--bg);
@@ -21,19 +23,19 @@
 
     /* Page header - matching Account_Management.html */
     header.page-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 24px 32px;
-      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-      border-radius: 16px;
-      color: white;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
-      position: relative;
-      overflow: hidden;
-      margin-bottom: 24px;
-      animation: fadeInDown 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-    }
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 40px;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border-radius: var(--radius-lg);
+  color: white;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 32px;
+  animation: fadeInDown 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
 
     header.page-header::before {
       content: "";
@@ -57,19 +59,19 @@
     }
 
     .request-card {
-      background: white;
-      border-radius: 16px;
-      padding: 24px;
-      margin-bottom: 20px;
-      box-shadow: var(--card-shadow);
-      display: grid;
-      grid-template-columns: auto 1fr auto;
-      gap: 24px;
-      align-items: center;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      border: 1px solid #f1f5f9;
-      animation: fadeInUp 0.5s ease-out forwards;
-    }
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-premium);
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 24px;
+  align-items: center;
+  transition: var(--transition);
+  border: 1px solid rgba(0,0,0,0.02);
+  animation: fadeInUp 0.5s ease-out forwards;
+}
 
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(20px); }
@@ -321,17 +323,17 @@
       transform: scale(1.05);
     }
 
-    /* Controls Styling */
     .controls-container {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 24px;
-      align-items: center;
-      background: white;
-      padding: 16px;
-      border-radius: 12px;
-      box-shadow: var(--card-shadow);
-    }
+  display: flex;
+  gap: 20px;
+  margin-bottom: 32px;
+  align-items: center;
+  background: white;
+  padding: 24px;
+  border-radius: 18px;
+  box-shadow: var(--shadow-premium);
+  border: 1px solid rgba(0,0,0,0.02);
+}
 
     .search-box {
       flex: 1;
