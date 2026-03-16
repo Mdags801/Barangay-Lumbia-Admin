@@ -8,13 +8,13 @@
 require_once __DIR__ . '/config.php';
 
 // Harden session cookie settings
-// session_set_cookie_params([
-//     'lifetime' => SESSION_LIFETIME,
-//     'path'     => '/',
-//     'secure'   => SESSION_COOKIE_SECURE,
-//     'httponly' => true,                     // JS cannot read the cookie
-//     'samesite' => SESSION_COOKIE_SAMESITE,
-// ]);
+session_set_cookie_params([
+    'lifetime' => SESSION_LIFETIME,
+    'path'     => '/',
+    'secure'   => SESSION_COOKIE_SECURE,
+    'httponly' => true,                     // JS cannot read the cookie
+    'samesite' => SESSION_COOKIE_SAMESITE,
+]);
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();

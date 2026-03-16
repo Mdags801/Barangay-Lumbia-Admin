@@ -1,8 +1,7 @@
 {
-  "cleanUrls": true,
   "functions": {
     "**/*.php": {
-      "runtime": "vercel-php@0.9.0"
+      "runtime": "juicy-fx/vercel-php@latest"
     }
   },
   "routes": [
@@ -11,8 +10,12 @@
       "status": 403
     },
     {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
+      "src": "/api/(.*).php",
+      "dest": "/api/$1.php"
+    },
+    {
+      "src": "/(.*).(css|js|png|jpg|jpeg|gif|svg|ico|webp|ttf|woff|woff2)",
+      "dest": "/$1.$2"
     },
     {
       "src": "/",
@@ -21,6 +24,10 @@
     {
       "src": "/login",
       "dest": "/login.php"
+    },
+    {
+      "src": "/((?!api|config|session_guard|.*\\.).*)",
+      "dest": "/$1.php"
     }
   ]
 }
