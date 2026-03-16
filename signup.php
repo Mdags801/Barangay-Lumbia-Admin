@@ -84,16 +84,16 @@
 
   <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
 
-  <!-- Custom Alert Modal -->
+  <!-- Custom Alert Modal (Standardized) -->
   <div id="alertModal" class="custom-modal" role="alertdialog" aria-modal="true" aria-labelledby="alertTitle">
     <div class="card-modal">
       <div id="alertIconCircle" class="modal-icon-circle icon-info">
         <i id="alertIcon" class="fas fa-user-check" aria-hidden="true"></i>
       </div>
-      <h2 id="alertTitle" style="margin:0 0 8px;font-size:1.5rem;">Notification</h2>
-      <p id="alertText" style="color:#64748b;margin:0;line-height:1.5;">Message content goes here.</p>
-      <div class="modal-actions-custom" style="justify-content:center;margin-top:24px;">
-        <button class="btn-confirm" onclick="window.location.href='login.php'" style="max-width:200px;">
+      <h2 id="alertTitle" style="margin:0 0 8px; font-size:1.5rem; font-weight: 800;">Notification</h2>
+      <p id="alertText" style="color:#64748b; margin:0 0 24px; line-height:1.5;">Message content goes here.</p>
+      <div class="modal-actions" style="justify-content:center;">
+        <button class="btn-confirm" onclick="window.location.href='login.php'" style="max-width:240px;">
           Go to Login
         </button>
       </div>

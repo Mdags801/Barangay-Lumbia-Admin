@@ -94,11 +94,10 @@
 <!-- Custom Confirmation Modal -->
 <div id="confirmModal" class="custom-modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
   <div class="card-modal">
-    <div id="confirmIconCircle" class="modal-icon-circle"><i id="confirmIcon" class="fas fa-question"
-        aria-hidden="true"></i></div>
-    <h2 id="confirmTitle" style="margin:0 0 8px; font-size:1.5rem;">Confirm Action</h2>
-    <p id="confirmText" style="color:#64748b; margin:0; line-height:1.5;">Are you sure you want to proceed?</p>
-    <div class="modal-actions-custom">
+    <div id="confirmIconCircle" class="modal-icon-circle icon-warning"><i id="confirmIcon" class="fas fa-question" aria-hidden="true"></i></div>
+    <h2 id="confirmTitle" style="margin:0 0 12px; font-size:1.6rem; font-weight: 900; letter-spacing:-0.01em;">Confirm Action</h2>
+    <p id="confirmText" style="color:#64748b; margin:0 0 28px; line-height:1.5;">Are you sure you want to proceed?</p>
+    <div class="modal-actions">
       <button class="btn-cancel" id="confirmCancelBtn">Cancel</button>
       <button class="btn-confirm" id="confirmOkBtn">Confirm</button>
     </div>
@@ -108,12 +107,11 @@
 <!-- Custom Alert Modal -->
 <div id="alertModal" class="custom-modal" role="alertdialog" aria-modal="true" aria-labelledby="alertTitle">
   <div class="card-modal">
-    <div id="alertIconCircle" class="modal-icon-circle"><i id="alertIcon" class="fas fa-info-circle"
-        aria-hidden="true"></i></div>
-    <h2 id="alertTitle" style="margin:0 0 8px; font-size:1.5rem;">Notification</h2>
-    <p id="alertText" style="color:#64748b; margin:0; line-height:1.5;">Message content goes here.</p>
-    <div class="modal-actions-custom" style="justify-content:center;">
-      <button class="btn-confirm" onclick="closeModals()" style="max-width:200px;">Understood</button>
+    <div id="alertIconCircle" class="modal-icon-circle icon-info"><i id="alertIcon" class="fas fa-info-circle" aria-hidden="true"></i></div>
+    <h2 id="alertTitle" style="margin:0 0 12px; font-size:1.6rem; font-weight: 900; letter-spacing:-0.01em;">Notification</h2>
+    <p id="alertText" style="color:#64748b; margin:0 0 28px; line-height:1.5;">Message content goes here.</p>
+    <div class="modal-actions">
+      <button class="btn-confirm" onclick="closeModals()">Understood</button>
     </div>
   </div>
 </div>

@@ -93,7 +93,7 @@
       const toast = document.createElement('div');
       type = String(msg).toLowerCase().includes('failed') ? 'danger' : type;
       toast.className = `toast ${type}`;
-      const iconInfo = type === 'danger' ? 'exclamation-circle' : type === 'success' ? 'check-circle' : 'info-circle';
+      const iconInfo = type === 'danger' ? 'times-circle' : type === 'success' ? 'check-circle' : 'info-circle';
       toast.innerHTML = `<div class="icon"><i class="fas fa-${iconInfo}"></i></div><div class="content"><strong>Notification</strong><br/>${msg}</div><button class="close">&times;</button>`;
       container.appendChild(toast);
       requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('show')));
@@ -101,6 +101,50 @@
       toast.querySelector('.close').onclick = hide;
       setTimeout(hide, 5000);
     };
+
+    function showConfirm({ title, text, icon, type = 'info', confirmText = 'Confirm' }) {
+      return new Promise((resolve) => {
+        const modal = document.getElementById('confirmModal');
+        const iconEl = document.getElementById('confirmIcon');
+        const circle = document.getElementById('confirmIconCircle');
+        const okBtn = document.getElementById('confirmOkBtn');
+        const cancelBtn = document.getElementById('confirmCancelBtn');
+
+        document.getElementById('confirmTitle').textContent = title;
+        document.getElementById('confirmText').textContent = text;
+        iconEl.className = `fas fa-${icon || 'question'}`;
+        okBtn.textContent = confirmText;
+
+        // Reset classes
+        circle.className = 'modal-icon-circle ' + (type === 'danger' ? 'icon-danger' : type === 'warning' ? 'icon-warning' : 'icon-info');
+        okBtn.className = type === 'danger' ? 'btn-danger' : 'btn-confirm';
+
+        modal.style.display = 'flex';
+
+        const handleConfirm = () => {
+          modal.style.display = 'none';
+          cleanup();
+          resolve(true);
+        };
+        const handleCancel = () => {
+          modal.style.display = 'none';
+          cleanup();
+          resolve(false);
+        };
+
+        function cleanup() {
+          okBtn.removeEventListener('click', handleConfirm);
+          cancelBtn.removeEventListener('click', handleCancel);
+        }
+
+        okBtn.addEventListener('click', handleConfirm);
+        cancelBtn.addEventListener('click', handleCancel);
+      });
+    }
+
+    function closeModals() {
+      document.querySelectorAll('.custom-modal').forEach(m => m.style.display = 'none');
+    }
 
     // Helper: escape HTML
     function escapeHtml(s) {
@@ -207,7 +251,14 @@
           const id = btn.dataset.id;
           if (!id) return alert('Invalid incident id.');
 
-          if (!confirm('Restore this incident to active incidents?')) return;
+          const confirmed = await showConfirm({
+            title: 'Restore Incident?',
+            text: 'This will move the incident back to the active list. Responders will be notified if they track live updates.',
+            icon: 'undo',
+            type: 'info',
+            confirmText: 'Restore Now'
+          });
+          if (!confirmed) return;
 
           try {
             // Fetch archived row to ensure we have latest data

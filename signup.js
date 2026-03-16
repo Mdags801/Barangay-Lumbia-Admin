@@ -10,11 +10,11 @@ function showMsg(msg, type) {
     msgBox.className = type || '';
     msgBox.style.display = 'block';
   } else {
-    showToast(msg, type || 'info');
+    showToast(msg, type === 'success' ? 'success' : 'info');
   }
 }
 
-function showToast(msg, type) {
+function showToast(msg, type = 'info') {
   let container = document.getElementById('toastContainer');
   if (!container) {
     container = document.createElement('div');
@@ -26,11 +26,15 @@ function showToast(msg, type) {
   }
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
+  
   const iconClass = type === 'error' || type === 'danger'
     ? 'times-circle' : type === 'success' ? 'check-circle' : 'info-circle';
-  toast.innerHTML = `<div class="icon"><i class="fas fa-${iconClass}"></i></div>
-    <div class="content"><strong>Notification</strong><br/>${msg}</div>
-    <button class="close">&times;</button>`;
+    
+  toast.innerHTML = `
+    <div class="icon"><i class="fas fa-${iconClass}"></i></div>
+    <div class="content"><strong>System Notification</strong><br/>${msg}</div>
+    <button class="close">&times;</button>
+  `;
   container.appendChild(toast);
   requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('show')));
   const hide = () => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 200); };
@@ -42,7 +46,7 @@ function withButtonLoading(button, fn) {
   if (!button) return fn();
   const originalText = button.textContent;
   button.disabled = true;
-  button.textContent = 'Loading...';
+  button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
   return Promise.resolve(fn()).finally(() => {
     button.disabled = false;
     button.textContent = originalText;
@@ -57,9 +61,16 @@ function showAlreadyRegisteredModal(email, role) {
   const modal = document.getElementById('alertModal');
   const title = document.getElementById('alertTitle');
   const text  = document.getElementById('alertText');
+  const icon  = document.getElementById('alertIcon');
+  const circle = document.getElementById('alertIconCircle');
+  
   if (!modal) return;
   title.textContent = 'Account Found';
   text.innerHTML = `The email <strong>${email}</strong> is already registered as <strong>${role}</strong>. Please log in instead.`;
+  
+  icon.className = 'fas fa-user-check';
+  circle.className = 'modal-icon-circle icon-info';
+  
   modal.style.display = 'flex';
 }
 
@@ -200,8 +211,8 @@ function initializeSignup() {
           // Sign out — they are pending approval
           await supabase.auth.signOut();
 
-          showMsg('Verification successful! Your account request has been submitted.', 'success');
-          if (window.showToast) showToast('Request submitted! Please wait for approval.', 'success');
+          showMsg('Registering successful! Your account request has been submitted.', 'success');
+          showToast('Request submitted! Please wait for administrative approval.', 'success');
           setTimeout(() => window.location.href = 'login.php', 2500);
         } else {
           showMsg('Signup request completed. Please check your email.', 'info');

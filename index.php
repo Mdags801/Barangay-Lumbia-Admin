@@ -129,24 +129,21 @@ require_once __DIR__ . '/session_guard.php';
     </div>
   </div>
 
-  <!-- Logout Confirmation Modal -->
-  <div id="logoutModal" class="logout-modal" style="display:none;">
-    <div class="logout-card">
-      <div class="logout-icon"><i class="fas fa-sign-out-alt"></i></div>
-      <h2>Sign Out?</h2>
-      <p>Are you sure you want to end your session?</p>
-      <div class="logout-actions">
-        <button class="btn-cancel" id="cancelLogout">Stay</button>
+  <!-- Standardized Logout Confirmation Modal -->
+  <div id="logoutModal" class="custom-modal" role="dialog" aria-modal="true" aria-labelledby="logoutTitle">
+    <div class="card-modal">
+      <div class="modal-icon-circle icon-danger"><i class="fas fa-sign-out-alt"></i></div>
+      <h2 id="logoutTitle" style="margin:0 0 12px; font-size:1.6rem; font-weight:900; letter-spacing:-0.01em;">Sign Out?</h2>
+      <p style="color:#64748b; margin:0 0 28px; line-height:1.5;">Are you sure you want to end your active session and disconnect from the portal?</p>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="cancelLogout">Stay Connected</button>
         <button class="btn-confirm" id="confirmLogout">Sign Out</button>
       </div>
     </div>
   </div>
 
-
-
-  <!-- System Core (v9.1 - Final Stability) -->
+  <!-- Standardized bridge for PHP session into the JS layer -->
   <script>
-    // Bridge the PHP session into the JS layer (full user info)
     window.PHP_SESSION = {
       access_token: <?php echo json_encode($_SESSION['access_token'] ?? ''); ?>,
       user_id:      <?php echo json_encode($_SESSION['user_id']     ?? ''); ?>,
@@ -154,7 +151,6 @@ require_once __DIR__ . '/session_guard.php';
       role:         <?php echo json_encode($_SESSION['role']        ?? ''); ?>,
       full_name:    <?php echo json_encode($_SESSION['full_name']   ?? ''); ?>
     };
-    console.log('[System] PHP Session:', window.PHP_SESSION.email || 'NO SESSION');
   </script>
   <script src="portal_v9.js?v=<?php echo time(); ?>"></script>
 
@@ -169,11 +165,11 @@ require_once __DIR__ . '/session_guard.php';
     <div class="active-drawer-header">
       <div class="active-drawer-title">
         <span class="live-dot-pulse"></span>
-        <h3>Real-time Presence</h3>
+        <h3 style="font-weight: 800;">Real-time Presence</h3>
         <span id="activeUsersCount" class="active-drawer-count">0</span>
       </div>
-      <div id="presenceStatus" style="font-size: 0.65rem; color: #64748b; font-weight: 600; background: #f1f5f9; padding: 2px 8px; border-radius: 12px; display: flex; align-items:center; gap:4px; margin-left:12px;">
-         <i id="presenceStatusIcon" class="fas fa-circle" style="font-size:0.5rem; color:#f59e0b; display: inline-block; flex-shrink: 0;"></i>
+      <div id="presenceStatus" style="font-size: 0.65rem; color: #64748b; font-weight: 700; background: #f1f5f9; padding: 4px 10px; border-radius: 12px; display: flex; align-items:center; gap:6px; margin-left:12px; text-transform:uppercase; letter-spacing:0.02em;">
+         <i id="presenceStatusIcon" class="fas fa-circle" style="font-size:0.55rem; color:#f59e0b; display: inline-block; flex-shrink: 0;"></i>
          <span id="presenceStatusText">Connecting...</span>
       </div>
       <button id="closeActiveDrawer" class="active-drawer-close" aria-label="Close panel">
@@ -182,39 +178,50 @@ require_once __DIR__ . '/session_guard.php';
     </div>
     
     <div style="padding: 16px 20px; border-bottom: 1px solid #f1f5f9; background: #fafafa;">
-      <p style="margin:0 0 12px; font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Connected Personnel</p>
+      <p style="margin:0 0 12px; font-size: 0.75rem; color: #64748b; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em;">Connected Personnel</p>
       <div class="search-wrap" style="position:relative;">
-        <i class="fas fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:0.8rem; color:#94a3b8;"></i>
+        <i class="fas fa-search" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); font-size:0.85rem; color:#94a3b8;"></i>
         <input type="text" id="presenceSearch" placeholder="Find user..." 
-          style="width:100%; padding:8px 12px 8px 34px; border-radius:8px; border:1px solid #e2e8f0; font-size:0.85rem; outline:none;" />
+          style="width:100%; padding:10px 14px 10px 38px; border-radius:12px; border:1px solid #e2e8f0; font-size:0.9rem; outline:none; font-family:inherit; font-weight:500;" />
       </div>
     </div>
 
     <div id="activeUsersList" class="active-users-list">
       <div class="active-empty-state">
-        <i class="fas fa-wifi" style="font-size:2rem;opacity:.3;"></i>
-        <p>No active users yet...</p>
+        <i class="fas fa-wifi" style="font-size:2.5rem; opacity:.15; margin-bottom:12px;"></i>
+        <p style="font-weight:600; color:#64748b;">No active users yet...</p>
       </div>
     </div>
   </div>
   <div id="activeDrawerOverlay" class="active-drawer-overlay"></div>
-  <!-- ===== END ACTIVE USERS ===== -->
 
-  <!-- ===== GLOBAL INCIDENT DETAILS MODAL ===== -->
-  <div id="globalIncidentModal" class="modal" role="dialog" aria-modal="true" aria-hidden="true"
-    style="z-index: 20000;">
-    <div class="modal-content" style="max-width: 600px;">
-      <span class="close" title="Close" onclick="closeGlobalIncidentModal()">&times;</span>
-      <div id="globalModalDetails"></div>
-      <div id="globalIncidentMap" style="height: 250px; border-radius: 12px; margin-top: 20px;"></div>
-      <div class="modal-actions" style="margin-top: 30px;">
-        <button class="btn-confirm" style="flex:1;" onclick="closeGlobalIncidentModal()">Close Details</button>
-        <button class="btn-notify" style="background:#64748b;"
-          onclick="loadPage('incident'); closeGlobalIncidentModal();">Manage in
-          Portal</button>
+  <!-- ===== GLOBAL INCIDENT DETAILS MODAL (Premium Landscape) ===== -->
+  <div id="globalIncidentModal" class="custom-modal" role="dialog" aria-modal="true" aria-hidden="true" style="z-index: 20000;">
+    <div class="card-modal" style="width: 850px; max-width: 95vw; padding: 0; overflow: hidden; display: flex; flex-direction: row; border-radius: 28px;">
+      <!-- Left Column: Primary Details -->
+      <div style="flex: 1; padding: 40px; text-align: left; border-right: 1px solid #f1f5f9;">
+         <div id="globalModalHeader"></div>
+         <div id="globalModalMeta" style="margin-bottom: 32px;"></div>
+         <div id="globalModalDescription" style="background: #f8fafc; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; min-height: 100px;"></div>
+      </div>
+
+      <!-- Right Column: Visual & Actions -->
+      <div style="width: 360px; background: #f8fafc; padding: 40px; display: flex; flex-direction: column;">
+         <div id="globalIncidentMap" style="height: 220px; border-radius: 20px; border: 2px solid #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-bottom: 32px;"></div>
+         <div id="globalModalFooter" style="margin-top: auto; display: flex; flex-direction: column; gap: 14px;">
+            <button class="btn-confirm" style="width: 100%; padding: 18px; font-weight: 800;" onclick="closeGlobalIncidentModal()">Dismiss Window</button>
+            <button class="btn-cancel" style="width: 100%; padding: 16px; background: white; font-weight: 700;" onclick="loadPage('incident'); closeGlobalIncidentModal();">
+              <i class="fas fa-external-link-alt" style="margin-right:8px;"></i> Open Full Panel
+            </button>
+         </div>
       </div>
     </div>
   </div>
+
+  <div id="toastContainer" class="toast-container"></div>
+</body>
+
+</html>
 
 </body>
 

@@ -87,26 +87,26 @@
     </div>
   </main>
 
-  <script src="reset.js?v=<?php echo time(); ?>" defer></script>
-
-  <!-- Custom Alert Modal -->
-  <div id="alertModal" class="custom-modal" role="alertdialog" aria-modal="true" aria-labelledby="alertTitle" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.7); backdrop-filter:blur(4px); z-index:10000; align-items:center; justify-content:center;">
-    <div class="card-modal" style="background:white; padding:32px; border-radius:16px; max-width:400px; width:90%; box-shadow:0 25px 50px -12px rgba(0,0,0,0.25); text-align:center;">
-      <div id="alertIconCircle" style="width:64px; height:64px; background:#f1f5f9; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:1.5rem; color:#1e40af;">
+  <!-- Custom Alert Modal (Standardized) -->
+  <div id="alertModal" class="custom-modal" role="alertdialog" aria-modal="true" aria-labelledby="alertTitle">
+    <div class="card-modal">
+      <div id="alertIconCircle" class="modal-icon-circle icon-info">
         <i id="alertIcon" class="fas fa-info-circle"></i>
       </div>
-      <h2 id="alertTitle" style="margin:0 0 8px; font-size:1.5rem; color:#0f172a;">Notification</h2>
+      <h2 id="alertTitle" style="margin:0 0 8px; font-size:1.5rem; font-weight: 800;">Notification</h2>
       <p id="alertText" style="color:#64748b; margin:0 0 24px; line-height:1.5;">Message content goes here.</p>
-      <div class="modal-actions">
-        <button class="btn-primary" onclick="closeAlertModal()" style="width:100%; padding:12px; border:none; border-radius:8px; background:#1e40af; color:white; font-weight:600; cursor:pointer;">Understood</button>
+      <div class="modal-actions" style="justify-content:center;">
+        <button class="btn-confirm" onclick="closeAlertModal()">Understood</button>
       </div>
     </div>
   </div>
 
   <script>
     function closeAlertModal() {
+      // Direct hide as reset.js expects this function occasionally
       document.getElementById('alertModal').style.display = 'none';
     }
   </script>
+  <script src="reset.js?v=<?php echo time(); ?>" defer></script>
 </body>
 </html>

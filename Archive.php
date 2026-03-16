@@ -4,25 +4,22 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Incident Archives</title>
+  <title>Archived Incidents</title>
   <link rel="stylesheet" href="global.css">
   <link rel="stylesheet" href="incident.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
-<body style="background: #f8fafc; padding: 16px 24px 24px;">
-  <header style="margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center; padding: 40px; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-radius: 24px; color: white; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); position: relative; overflow: hidden;">
-    <div style="z-index: 1;">
-      <h1 style="font-size: 2.8rem; font-weight: 900; margin: 0; letter-spacing: -0.04em;">Incident Archives</h1>
-      <p style="color: #94a3b8; font-weight: 500; font-size: 1.15rem; margin-top: 8px;">Secure storage for past emergency records</p>
-    </div>
-    <div style="position: absolute; top: -50%; right: -10%; width: 60%; height: 200%; background: radial-gradient(circle, rgba(37, 99, 235, 0.15), transparent 70%); pointer-events: none; z-index: 0;"></div>
+<body>
+  <header>
+    <h1>Archived Incidents</h1>
+    <p>Past reports stored for record-keeping</p>
   </header>
 
   <div class="controls">
     <div class="left">
-      <input id="searchInput" type="text" placeholder="Search archived incidents..." />
-      <select id="sortSelect" title="Sort Order">
+      <input id="searchInput" type="text" placeholder="Search by ID, reporter, type, or location" />
+      <select id="sortSelect" title="Sort">
         <option value="newest">Newest First</option>
         <option value="oldest">Oldest First</option>
       </select>
@@ -44,6 +41,31 @@
       </thead>
       <tbody id="archiveTableBody"></tbody>
     </table>
+  </div>
+
+  <!-- Custom Confirmation Modal -->
+  <div id="confirmModal" class="custom-modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <div class="card-modal">
+      <div id="confirmIconCircle" class="modal-icon-circle icon-warning"><i id="confirmIcon" class="fas fa-question" aria-hidden="true"></i></div>
+      <h2 id="confirmTitle" style="margin:0 0 12px; font-size:1.6rem; font-weight: 900; letter-spacing:-0.01em;">Confirm Action</h2>
+      <p id="confirmText" style="color:#64748b; margin:0 0 28px; line-height:1.5;">Are you sure you want to proceed?</p>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="confirmCancelBtn">Cancel</button>
+        <button class="btn-confirm" id="confirmOkBtn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Alert Modal -->
+  <div id="alertModal" class="custom-modal" role="alertdialog" aria-modal="true" aria-labelledby="alertTitle">
+    <div class="card-modal">
+      <div id="alertIconCircle" class="modal-icon-circle icon-info"><i id="alertIcon" class="fas fa-info-circle" aria-hidden="true"></i></div>
+      <h2 id="alertTitle" style="margin:0 0 12px; font-size:1.6rem; font-weight: 900; letter-spacing:-0.01em;">Notification</h2>
+      <p id="alertText" style="color:#64748b; margin:0 0 28px; line-height:1.5;">Message content goes here.</p>
+      <div class="modal-actions">
+        <button class="btn-confirm" onclick="closeModals()">Understood</button>
+      </div>
+    </div>
   </div>
 
   <!-- Supabase JS -->

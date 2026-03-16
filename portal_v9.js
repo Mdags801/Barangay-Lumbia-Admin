@@ -365,6 +365,36 @@ console.log('%c [System] Core Version 9.1 (Isolated & Stable) ', 'background: #1
       }
     });
 
+    // --- Global Modal Lifecycle (HCI: User Control & Freedom) ---
+    function closeAllModals() {
+      // Close all top-level modals
+      if (typeof closeGlobalIncidentModal === 'function') closeGlobalIncidentModal();
+      if (logoutModal) logoutModal.style.display = 'none';
+      
+      // Close any other custom-modal or modal elements
+      document.querySelectorAll('.custom-modal, .modal').forEach(m => {
+        m.style.display = 'none';
+      });
+    }
+
+    // Escape listener
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeAllModals();
+      }
+    });
+
+    // Click outside listener
+    window.addEventListener('click', (e) => {
+      if (e.target.classList.contains('custom-modal') || e.target.classList.contains('modal')) {
+        // Only dismiss if it's not a strict confirmation modal
+        const isStrict = e.target.id === 'logoutModal' || e.target.hasAttribute('data-strict-modal');
+        if (!isStrict) {
+            e.target.style.display = 'none';
+        }
+      }
+    });
+
     // --- Toast Notifications ---
     function showToast(msg, type = 'info') {
       let container = document.getElementById('toastContainer');
@@ -958,13 +988,17 @@ console.log('%c [System] Core Version 9.1 (Isolated & Stable) ', 'background: #1
 
     async function openGlobalIncidentModal(id) {
       const modal = document.getElementById('globalIncidentModal');
-      const details = document.getElementById('globalModalDetails');
+      const header = document.getElementById('globalModalHeader');
+      const meta = document.getElementById('globalModalMeta');
+      const desc = document.getElementById('globalModalDescription');
       const mapContainer = document.getElementById('globalIncidentMap');
 
-      if (!modal || !details) return;
+      if (!header || !meta || !desc) return;
 
       // Reset UI
-      details.innerHTML = '<div style="text-align:center;padding:40px;"><i class="fas fa-spinner fa-spin" style="font-size:2rem;color:#64748b;"></i><p>Loading incident details...</p></div>';
+      header.innerHTML = '<div style="padding:40px; text-align:center;"><i class="fas fa-spinner fa-spin" style="font-size:2rem; color:#64748b;"></i></div>';
+      meta.innerHTML = '';
+      desc.innerHTML = '';
       modal.style.display = 'flex';
       modal.setAttribute('aria-hidden', 'false');
 
@@ -977,35 +1011,36 @@ console.log('%c [System] Core Version 9.1 (Isolated & Stable) ', 'background: #1
         const time = data.reportedAt ? new Date(data.reportedAt).toLocaleString() : 'N/A';
         const statusClass = (data.status || 'pending').toLowerCase().replace(/\s+/g, '');
 
-        details.innerHTML = `
-          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px;">
+        header.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
             <div>
-              <h2 style="margin:0 0 4px; font-size:1.5rem;">${type} Incident</h2>
-              <p style="margin:0; font-size:0.85rem; color:#64748b;">Report ID: ${data.incidentId || data.id}</p>
+              <h2 style="margin:0 0 4px; font-size:1.8rem; font-weight:900; letter-spacing:-0.02em;">${type} Incident</h2>
+              <p style="margin:0; font-size:0.9rem; color:#64748b; font-weight:500;">Batch ID: ${data.incidentId || data.id}</p>
             </div>
-            <span class="status-pill ${statusClass}">${data.status || 'Pending'}</span>
+            <span class="status-pill ${statusClass}" style="padding: 8px 16px; font-size: 0.8rem; border-radius: 12px; font-weight: 800; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">${data.status || 'Pending'}</span>
           </div>
-          
-          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:20px;">
-            <div class="detail-box" style="background:#f8fafc; padding:12px; border-radius:12px; border:1px solid #e2e8f0;">
-              <small style="text-transform:uppercase; font-weight:800; color:#94a3b8; font-size:0.65rem; display:block; margin-bottom:4px;">Reported At</small>
-              <div style="font-weight:600; font-size:0.88rem;">${time}</div>
-            </div>
-            <div class="detail-box" style="background:#f8fafc; padding:12px; border-radius:12px; border:1px solid #e2e8f0;">
-              <small style="text-transform:uppercase; font-weight:800; color:#94a3b8; font-size:0.65rem; display:block; margin-bottom:4px;">Reporter</small>
-              <div style="font-weight:600; font-size:0.88rem;">${(data.reporter || 'Anonymous').split('(')[0].trim()}</div>
-            </div>
-          </div>
+        `;
 
-          <div style="margin-bottom:20px;">
-            <small style="text-transform:uppercase; font-weight:800; color:#94a3b8; font-size:0.65rem; display:block; margin-bottom:4px;">Location</small>
-            <div style="font-weight:600; font-size:0.95rem;">${location}</div>
+        meta.innerHTML = `
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+            <div style="background:#f1f5f9; padding:16px; border-radius:14px; border:1px solid #e2e8f0;">
+              <span style="display:block; text-transform:uppercase; font-size:0.65rem; font-weight:900; color:#94a3b8; letter-spacing:0.1em; margin-bottom:8px;">Reporters Identity</span>
+              <div style="font-weight:700; color:#1e293b; font-size:0.95rem;"><i class="fas fa-user-circle" style="margin-right:8px; color:#64748b;"></i>${(data.reporter || 'Anonymous').split('(')[0].trim()}</div>
+            </div>
+            <div style="background:#f1f5f9; padding:16px; border-radius:14px; border:1px solid #e2e8f0;">
+              <span style="display:block; text-transform:uppercase; font-size:0.65rem; font-weight:900; color:#94a3b8; letter-spacing:0.1em; margin-bottom:8px;">Timestamp</span>
+              <div style="font-weight:700; color:#1e293b; font-size:0.95rem;"><i class="fas fa-clock" style="margin-right:8px; color:#64748b;"></i>${time}</div>
+            </div>
           </div>
+          <div style="margin-top:16px; padding:16px; background:#f1f5f9; border-radius:14px; border:1px solid #e2e8f0;">
+            <span style="display:block; text-transform:uppercase; font-size:0.65rem; font-weight:900; color:#94a3b8; letter-spacing:0.1em; margin-bottom:8px;">Approximate Location</span>
+            <div style="font-weight:700; color:#1e293b; font-size:0.95rem;"><i class="fas fa-map-marker-alt" style="margin-right:8px; color:#ef4444;"></i>${location}</div>
+          </div>
+        `;
 
-          <div style="margin-bottom:20px;">
-            <small style="text-transform:uppercase; font-weight:800; color:#94a3b8; font-size:0.65rem; display:block; margin-bottom:4px;">Description</small>
-            <div style="line-height:1.5; color:#475569;">${data.description || 'No additional details provided.'}</div>
-          </div>
+        desc.innerHTML = `
+          <span style="display:block; text-transform:uppercase; font-size:0.65rem; font-weight:900; color:#94a3b8; letter-spacing:0.1em; margin-bottom:12px;">Incident Narrative</span>
+          <div style="line-height:1.6; color:#334155; font-weight:500; font-size:0.95rem;">${data.description || 'No detailed description provided by the reporter.'}</div>
         `;
 
         // Render Map if coordinates exist

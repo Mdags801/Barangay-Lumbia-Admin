@@ -1,18 +1,6 @@
-:root {
-  --primary: #2563eb;
-  --primary-glow: rgba(37, 99, 235, 0.4);
-  --secondary: #64748b;
-  --accent: #f59e0b;
-  --success: #10b981;
-  --danger: #ef4444;
-  --info: #3b82f6;
-  --bg-main: #f8fafc;
-  --bg-card: rgba(255, 255, 255, 0.85);
-  --border-glass: rgba(255, 255, 255, 0.5);
-  --shadow-premium: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-  --radius-premium: 20px;
-  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
+/* ==========================================
+   ALARM BANNER – New Citizen Incident Alert
+   ========================================== */
 
 .alarm-banner {
   position: fixed;
@@ -593,108 +581,84 @@ header {
 
 /* Shared Buttons */
 .btn {
-  padding: 10px 20px;
+  padding: 6px 14px;
   border: none;
-  border-radius: 12px;
+  border-radius: 4px;
   cursor: pointer;
-  font-weight: 700;
-  font-size: 0.9rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  transition: var(--transition-smooth);
-  box-shadow: var(--shadow-premium);
+  font-weight: bold;
+  transition: background 0.3s, transform 0.1s;
 }
 
 .btn:active {
-  transform: scale(0.96);
-}
-
-.btn.primary {
-  background: var(--primary);
-  color: #fff;
-}
-
-.btn.primary:hover {
-  background: #1d4ed8;
-  box-shadow: 0 10px 15px -3px var(--primary-glow);
-  transform: translateY(-2px);
+  transform: scale(0.95);
 }
 
 .btn.save {
-  background: var(--success);
+  background: #2ecc71;
   color: #fff;
 }
 
 .btn.save:hover {
-  background: #059669;
-  box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3);
-  transform: translateY(-2px);
+  background: #27ae60;
 }
 
 .btn.export {
-  background: #1e293b;
+  background: #3498db;
   color: #fff;
 }
 
 .btn.export:hover {
-  background: #0f172a;
-  transform: translateY(-2px);
+  background: #2980b9;
 }
 
-/* Premium Utility Classes */
-.premium-card {
-  background: var(--bg-card);
-  backdrop-filter: blur(12px) saturate(180%);
-  -webkit-backdrop-filter: blur(12px) saturate(180%);
-  border: 1px solid var(--border-glass);
-  border-radius: var(--radius-premium);
-  box-shadow: var(--shadow-premium);
-  padding: 24px;
-  transition: var(--transition-smooth);
-}
-
-.premium-card:hover {
-  border-color: rgba(37, 99, 235, 0.2);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-/* Custom GUI Modals */
-.custom-modal {
+/* Premium GUI Modals & Overlays */
+.custom-modal, .modal {
   display: none;
   position: fixed;
+  inset: 0;
   z-index: 10000;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(4px);
+  background-color: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(12px) saturate(180%); /* Premium Glass Blur */
   align-items: center;
   justify-content: center;
-  padding: 20px;
-  box-sizing: border-box;
+  padding: 24px;
+  animation: modalOverlayFadeIn 0.3s ease;
 }
 
-.card-modal {
+.card-modal, .modal-content {
   background: #ffffff;
   width: 100%;
-  max-width: 400px;
-  border-radius: 16px;
-  padding: 32px 24px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  max-width: 480px;
+  border-radius: 28px;
+  padding: 40px 32px;
+  box-shadow: 
+    0 40px 100px -10px rgba(15, 23, 42, 0.3),
+    0 10px 40px -15px rgba(0, 0, 0, 0.1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5);
   text-align: center;
   position: relative;
-  animation: modalPopIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  box-sizing: border-box;
+  overflow: hidden;
+  animation: modalSpringIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-@keyframes modalPopIn {
+/* Specific for taller modals (like Incident Details) */
+.modal-content {
+  text-align: left;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+@keyframes modalOverlayFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalSpringIn {
   from {
     opacity: 0;
-    transform: scale(0.95) translateY(10px);
+    transform: scale(0.9) translateY(40px);
   }
-
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
@@ -727,66 +691,70 @@ header {
   color: #ef4444;
 }
 
-.modal-actions {
+.modal-actions, .modal-actions-custom {
   display: flex;
-  gap: 12px;
-  margin-top: 24px;
-  justify-content: center;
-}
-
-.modal-actions-custom {
-  display: flex;
-  gap: 12px;
-  margin-top: 24px;
+  gap: 14px;
+  margin-top: 32px;
   justify-content: center;
 }
 
 .btn-cancel {
   flex: 1;
-  padding: 12px;
-  border-radius: 10px;
+  padding: 14px 20px;
+  border-radius: 16px;
   border: 1px solid #e2e8f0;
   background: #f8fafc;
-  color: #475569;
-  font-weight: 700;
+  color: #64748b;
+  font-weight: 750;
+  font-size: 0.95rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-cancel:hover {
   background: #f1f5f9;
+  color: #1e293b;
+  transform: translateY(-1px);
 }
 
 .btn-confirm {
   flex: 1;
-  padding: 12px;
-  border-radius: 10px;
+  padding: 14px 20px;
+  border-radius: 16px;
   border: none;
-  background: #2563eb;
+  background: linear-gradient(135deg, #2563eb, #1e40af);
   color: white;
-  font-weight: 700;
+  font-weight: 750;
+  font-size: 0.95rem;
   cursor: pointer;
-  transition: all 0.2s;
+  box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.4);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-confirm:hover {
-  background: #1d4ed8;
+  transform: translateY(-2px);
+  box-shadow: 0 15px 30px -5px rgba(37, 99, 235, 0.5);
+  filter: brightness(1.1);
 }
 
 .btn-danger {
   flex: 1;
-  padding: 12px;
-  border-radius: 10px;
+  padding: 14px 20px;
+  border-radius: 16px;
   border: none;
-  background: #ef4444;
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
   color: white;
-  font-weight: 700;
+  font-weight: 750;
+  font-size: 0.95rem;
   cursor: pointer;
-  transition: all 0.2s;
+  box-shadow: 0 10px 20px -5px rgba(239, 68, 68, 0.4);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-danger:hover {
-  background: #b91c1c;
+  transform: translateY(-2px);
+  box-shadow: 0 15px 30px -5px rgba(239, 68, 68, 0.5);
+  filter: brightness(1.1);
 }
 
 /* Toast Notification System */
