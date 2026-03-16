@@ -5,14 +5,14 @@
  */
 
 // ─── Supabase ────────────────────────────────────────────────────────────────
-define('SUPABASE_URL',         'https://tukkkwtxuaxrbihyammp.supabase.co');
-define('SUPABASE_ANON_KEY',    'sb_publishable_23puPo1jOwFggf-4YTitRg_BQiGQl9P');
-define('SUPABASE_SERVICE_KEY', '');   // <-- Fill in your service_role key for admin operations
+define('SUPABASE_URL',         getenv('SUPABASE_URL')         ?: 'https://tukkkwtxuaxrbihyammp.supabase.co');
+define('SUPABASE_ANON_KEY',    getenv('SUPABASE_ANON_KEY')    ?: 'sb_publishable_23puPo1jOwFggf-4YTitRg_BQiGQl9P');
+define('SUPABASE_SERVICE_KEY', getenv('SUPABASE_SERVICE_KEY') ?: ''); 
 
 // ─── Session ─────────────────────────────────────────────────────────────────
-define('SESSION_LIFETIME',  60 * 60 * 8);   // 8 hours
-define('SESSION_COOKIE_SECURE',  false);     // Set TRUE when served over HTTPS
-define('SESSION_COOKIE_SAMESITE', 'Strict');
+define('SESSION_LIFETIME',  (int)(getenv('SESSION_LIFETIME')  ?: 28800)); // 8 hours default
+define('SESSION_COOKIE_SECURE',  getenv('SESSION_COOKIE_SECURE') === 'true' || !!getenv('VERCEL')); 
+define('SESSION_COOKIE_SAMESITE', getenv('SESSION_COOKIE_SAMESITE') ?: 'Strict');
 
 // ─── Allowed admin roles ──────────────────────────────────────────────────────
 define('ALLOWED_ROLES', ['admin', 'super admin', 'staff']);

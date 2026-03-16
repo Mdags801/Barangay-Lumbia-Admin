@@ -1,0 +1,45 @@
+{
+  "functions": {
+    "api/*.php": {
+      "runtime": "vercel-php@0.6.0"
+    },
+    "*.php": {
+      "runtime": "vercel-php@0.6.0"
+    }
+  },
+  "routes": [
+    {
+      "src": "/config.php",
+      "status": 403,
+      "continue": false
+    },
+    {
+      "src": "/session_guard.php",
+      "status": 403,
+      "continue": false
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/favicon.ico",
+      "dest": "/favicon.ico"
+    },
+    {
+      "src": "/(.*).(css|js|png|jpg|jpeg|gif|svg|ico|webp|ttf|woff|woff2)",
+      "dest": "/$1.$2"
+    },
+    {
+      "src": "/",
+      "dest": "/index.php"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1.php"
+    }
+  ],
+  "env": {
+    "PHPRC": "/var/task/php.ini"
+  }
+}
