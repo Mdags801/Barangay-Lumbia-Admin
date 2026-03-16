@@ -10,8 +10,8 @@
       "status": 403
     },
     {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
+      "src": "/api/(.*).php",
+      "dest": "/api/$1.php"
     },
     {
       "src": "/(.*).(css|js|png|jpg|jpeg|gif|svg|ico|webp|ttf|woff|woff2)",
@@ -22,7 +22,11 @@
       "dest": "/index.php"
     },
     {
-      "src": "/(.*)",
+      "src": "/(.*).php",
+      "dest": "/$1.php"
+    },
+    {
+      "src": "/((?!api|config|session_guard|.*\\.).*)",
       "dest": "/$1.php"
     }
   ]
