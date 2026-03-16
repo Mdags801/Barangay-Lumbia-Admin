@@ -12,7 +12,8 @@ define('SUPABASE_SERVICE_KEY', getenv('SUPABASE_SERVICE_KEY') ?: '');
 // ─── Session ─────────────────────────────────────────────────────────────────
 define('SESSION_LIFETIME',  (int)(getenv('SESSION_LIFETIME')  ?: 28800)); // 8 hours default
 define('SESSION_COOKIE_SECURE',  getenv('SESSION_COOKIE_SECURE') === 'true' || !!getenv('VERCEL')); 
-define('SESSION_COOKIE_SAMESITE', getenv('SESSION_COOKIE_SAMESITE') ?: 'Strict');
+define('SESSION_COOKIE_SAMESITE', getenv('SESSION_COOKIE_SAMESITE') ?: 'Lax');
+define('AUTH_COOKIE_NAME',        'sb_portal_token');
 
 // ─── Allowed admin roles ──────────────────────────────────────────────────────
 define('ALLOWED_ROLES', ['admin', 'super admin', 'staff']);

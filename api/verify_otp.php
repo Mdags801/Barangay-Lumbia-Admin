@@ -135,6 +135,15 @@ $_SESSION['full_name']    = $profile['full_name'] ?? '';
 $_SESSION['access_token'] = $accessToken;         // kept server-side only
 $_SESSION['last_activity']= time();
 
+// Set a stateless auth cookie for Vercel/Serverless support
+setcookie(AUTH_COOKIE_NAME, $accessToken, [
+    'expires' => time() + SESSION_LIFETIME,
+    'path' => '/',
+    'secure' => SESSION_COOKIE_SECURE,
+    'httponly' => true,
+    'samesite' => 'Lax'
+]);
+
 echo json_encode([
     'success'       => true,
     'role'          => $profile['role'],

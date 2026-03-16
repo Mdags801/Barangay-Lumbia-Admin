@@ -96,7 +96,7 @@ $profiles = json_decode($profileResp, true);
 $profile  = $profiles[0] ?? null;
 
 if (!$profile) {
-    http_role_code(403);
+    http_response_code(403);
     echo json_encode(['error' => 'Profile not found. Please contact support.']);
     exit;
 }
@@ -105,9 +105,9 @@ $role   = strtolower($profile['role']   ?? '');
 $status = strtolower($profile['status'] ?? 'pending');
 
 // ─── Role check ───────────────────────────────────────────────────────────────
-if (in_array($role, ['citizen', 'responder'])) {
+if (!in_array($role, array_map('strtolower', ALLOWED_ROLES))) {
     http_response_code(403);
-    echo json_encode(['error' => 'Access Denied: Admin access only.']);
+    echo json_encode(['error' => 'Access Denied: Administrative personnel only.']);
     exit;
 }
 
@@ -126,6 +126,16 @@ $_SESSION['role']         = $profile['role'];
 $_SESSION['full_name']    = $profile['full_name'] ?? '';
 $_SESSION['access_token'] = $accessToken;
 $_SESSION['last_activity']= time();
+$_SESSION['ip_address']   = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+
+// Set a stateless auth cookie for Vercel/Serverless support
+setcookie(AUTH_COOKIE_NAME, $accessToken, [
+    'expires' => time() + SESSION_LIFETIME,
+    'path' => '/',
+    'secure' => SESSION_COOKIE_SECURE,
+    'httponly' => true,
+    'samesite' => 'Lax'
+]);
 
 echo json_encode([
     'success'   => true,

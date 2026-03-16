@@ -11,8 +11,9 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 session_unset();
 session_destroy();
 
-// Clear the session cookie
+// Clear the session cookies
 setcookie(session_name(), '', time() - 3600, '/');
+setcookie(AUTH_COOKIE_NAME, '', time() - 3600, '/');
 
 header('Content-Type: application/json');
 echo json_encode(['success' => true, 'redirect' => 'login.php']);
