@@ -474,6 +474,8 @@ main {
   background: #10b981;
   border-radius: 50%;
   position: relative;
+  display: block;
+  flex-shrink: 0;
 }
 
 .live-dot-pulse::after {
@@ -567,6 +569,7 @@ main {
   height: 14px;
   border-radius: 50%;
   border: 3px solid white;
+  aspect-ratio: 1;
 }
 
 .status-dot.online { background: #10b981; }

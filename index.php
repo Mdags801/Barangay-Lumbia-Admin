@@ -173,7 +173,7 @@ require_once __DIR__ . '/session_guard.php';
         <span id="activeUsersCount" class="active-drawer-count">0</span>
       </div>
       <div id="presenceStatus" style="font-size: 0.65rem; color: #64748b; font-weight: 600; background: #f1f5f9; padding: 2px 8px; border-radius: 12px; display: flex; align-items:center; gap:4px; margin-left:12px;">
-         <i id="presenceStatusIcon" class="fas fa-circle" style="font-size:0.5rem; color:#f59e0b;"></i>
+         <i id="presenceStatusIcon" class="fas fa-circle" style="font-size:0.5rem; color:#f59e0b; display: inline-block; flex-shrink: 0;"></i>
          <span id="presenceStatusText">Connecting...</span>
       </div>
       <button id="closeActiveDrawer" class="active-drawer-close" aria-label="Close panel">
