@@ -82,7 +82,7 @@
       <div class="form-group" style="position:relative;">
         <label for="labelInput" class="preview-label">Category Label</label>
         <div style="position:relative;">
-          <i class="fas fa-tag" style="position:absolute; left:16px; top:50%; transform:translateY(-50%); color:#94a3b8; z-index:1;"></i>
+          <i class="fas fa-tag" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#94a3b8; z-index:1; font-size:0.85rem;"></i>
           <input id="labelInput" placeholder="e.g., Structural Fire" class="premium-input-field" />
         </div>
 

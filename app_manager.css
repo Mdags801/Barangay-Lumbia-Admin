@@ -273,6 +273,26 @@ td {
     border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
+.premium-input-field {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px 10px 38px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    background: #f8fafc;
+    outline: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.premium-input-field:focus {
+    border-color: var(--primary);
+    background: white;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+}
+
 .preview-box {
     margin-top: 24px;
     padding: 24px;
@@ -286,12 +306,18 @@ td {
 }
 
 .preview-label {
-    font-size: 0.75rem;
-    font-weight: 700;
+    font-size: 0.7rem;
+    font-weight: 800;
     color: var(--text-muted);
     text-transform: uppercase;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
+    margin-top: 16px;
     display: block;
+    letter-spacing: 0.05em;
+}
+
+.preview-label:first-child {
+    margin-top: 0;
 }
 
 /* Animations */
