@@ -5,10 +5,10 @@
  * Rate-limited: max 3 OTP sends per 5 minutes per IP.
  */
 
-header('Content-Type: application/json');
-header('X-Content-Type-Options: nosniff');
-
 require_once __DIR__ . '/../config.php';
+apply_security_headers();
+header('Content-Type: application/json');
+
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);

@@ -6,11 +6,10 @@
  * then creates a server-side PHP session for the user.
  */
 
-header('Content-Type: application/json');
-header('X-Content-Type-Options: nosniff');
-header('X-Frame-Options: DENY');
-
 require_once __DIR__ . '/../config.php';
+apply_security_headers();
+header('Content-Type: application/json');
+
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -133,7 +132,9 @@ $_SESSION['email']        = $email;
 $_SESSION['role']         = $profile['role'];
 $_SESSION['full_name']    = $profile['full_name'] ?? '';
 $_SESSION['access_token'] = $accessToken;         // kept server-side only
-$_SESSION['last_activity']= time();
+$_SESSION['last_activity'] = time();
+// Store IP hash for session-hijack detection
+$_SESSION['ip_hash']      = hash('sha256', ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0') . CSRF_SECRET);
 
 // Set a stateless auth cookie for Vercel/Serverless support
 setcookie(AUTH_COOKIE_NAME, $accessToken, [

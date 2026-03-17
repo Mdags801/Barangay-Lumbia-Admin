@@ -1,16 +1,22 @@
 <?php
 /**
  * api/login_password.php
- * POST { email, password }
- * Verifies credentials with Supabase, checks role + status,
- * then creates a server-side PHP session.
+ * POST { email, password }  → RESTful login endpoint.
+ *
+ * Security:
+ *  - Server-side input validation (email format, non-empty password)
+ *  - Credentials verified by Supabase Auth (bcrypt hashing handled by Supabase)
+ *  - Role-based access control (ALLOWED_ROLES whitelist)
+ *  - Account status check (active only)
+ *  - session_regenerate_id() prevents session fixation
+ *  - Anti-clickjack / code-attack headers via apply_security_headers()
  */
 
-header('Content-Type: application/json');
-header('X-Content-Type-Options: nosniff');
-header('X-Frame-Options: DENY');
-
 require_once __DIR__ . '/../config.php';
+apply_security_headers();
+header('Content-Type: application/json');
+
+// config.php already loaded above
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -126,7 +132,8 @@ $_SESSION['role']         = $profile['role'];
 $_SESSION['full_name']    = $profile['full_name'] ?? '';
 $_SESSION['access_token'] = $accessToken;
 $_SESSION['last_activity']= time();
-$_SESSION['ip_address']   = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+// Store a hash of the client IP for session-hijack detection
+$_SESSION['ip_hash']      = hash('sha256', ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0') . CSRF_SECRET);
 
 // Set a stateless auth cookie for Vercel/Serverless support
 setcookie(AUTH_COOKIE_NAME, $accessToken, [

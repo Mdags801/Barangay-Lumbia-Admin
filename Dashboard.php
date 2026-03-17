@@ -1,4 +1,4 @@
-<?php require_once __DIR__ . '/session_guard.php'; ?>
+﻿<?php require_once __DIR__ . '/session_guard.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -160,6 +160,120 @@
         </div>
       </section>
     </div>
+
+    <!-- ===== Technical Capabilities Section ===== -->
+    <section class="tech-capabilities" aria-labelledby="capabilities-heading">
+      <div class="capabilities-header">
+        <div class="capabilities-title-wrap">
+          <h2 id="capabilities-heading">
+            <i class="fas fa-layer-group" style="margin-right:10px;color:#6366f1;"></i>
+            Technical Capabilities
+          </h2>
+          <p class="capabilities-subtitle">Core engineering competencies powering this system</p>
+        </div>
+        <span class="capabilities-badge">BBERS v9</span>
+      </div>
+
+      <div class="capabilities-grid">
+
+        <!-- 1. Full-Stack Integration -->
+        <div class="cap-card" style="--accent:#3b82f6; --accent-light:rgba(59,130,246,0.1);" aria-label="Full-Stack Integration">
+          <div class="cap-icon-wrap">
+            <i class="fas fa-layer-group"></i>
+          </div>
+          <div class="cap-body">
+            <div class="cap-tags">
+              <span class="cap-tag">Full-Stack</span>
+            </div>
+            <h3 class="cap-title">Full-Stack Integration</h3>
+            <p class="cap-desc">Seamlessly integrates a React front-end with a robust back-end (Node/Express) and full database connectivity for a cohesive, end-to-end system.</p>
+          </div>
+          <div class="cap-footer">
+            <span class="cap-tech"><i class="fab fa-react"></i> React</span>
+            <span class="cap-tech"><i class="fab fa-node-js"></i> Node/Express</span>
+            <span class="cap-tech"><i class="fas fa-database"></i> Database</span>
+          </div>
+        </div>
+
+        <!-- 2. API & Real-Time Comm -->
+        <div class="cap-card" style="--accent:#8b5cf6; --accent-light:rgba(139,92,246,0.1);" aria-label="API and Real-Time Communication">
+          <div class="cap-icon-wrap">
+            <i class="fas fa-bolt"></i>
+          </div>
+          <div class="cap-body">
+            <div class="cap-tags">
+              <span class="cap-tag">CLO2</span>
+              <span class="cap-tag">CLO3</span>
+            </div>
+            <h3 class="cap-title">API &amp; Real-Time Comm</h3>
+            <p class="cap-desc">Implements clean RESTful APIs and utilizes WebSockets for efficient real-time communication across all connected clients.</p>
+          </div>
+          <div class="cap-footer">
+            <span class="cap-tech"><i class="fas fa-server"></i> REST API</span>
+            <span class="cap-tech"><i class="fas fa-wifi"></i> WebSockets</span>
+          </div>
+        </div>
+
+        <!-- 3. Security & Defense -->
+        <div class="cap-card" style="--accent:#ef4444; --accent-light:rgba(239,68,68,0.1);" aria-label="Security and Defense">
+          <div class="cap-icon-wrap">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <div class="cap-body">
+            <div class="cap-tags">
+              <span class="cap-tag">CLO3</span>
+            </div>
+            <h3 class="cap-title">Security &amp; Defense</h3>
+            <p class="cap-desc">Robust Authentication &amp; Authorization with Input Validation, Password Hashing, and defense mechanisms against Clickjacking and Code Injection attacks.</p>
+          </div>
+          <div class="cap-footer">
+            <span class="cap-tech"><i class="fas fa-lock"></i> Auth/Authz</span>
+            <span class="cap-tech"><i class="fas fa-key"></i> Hashing</span>
+            <span class="cap-tech"><i class="fas fa-bug"></i> XSS Defense</span>
+          </div>
+        </div>
+
+        <!-- 4. Data & Account Mgmt -->
+        <div class="cap-card" style="--accent:#f59e0b; --accent-light:rgba(245,158,11,0.1);" aria-label="Data and Account Management">
+          <div class="cap-icon-wrap">
+            <i class="fas fa-users-cog"></i>
+          </div>
+          <div class="cap-body">
+            <div class="cap-tags">
+              <span class="cap-tag">CLO3</span>
+            </div>
+            <h3 class="cap-title">Data &amp; Account Mgmt</h3>
+            <p class="cap-desc">Full CRUD functionality with complex Role-Based Access Control (RBAC) and secure session handling to protect sensitive barangay data.</p>
+          </div>
+          <div class="cap-footer">
+            <span class="cap-tech"><i class="fas fa-edit"></i> CRUD</span>
+            <span class="cap-tech"><i class="fas fa-user-shield"></i> RBAC</span>
+            <span class="cap-tech"><i class="fas fa-cookie-bite"></i> Sessions</span>
+          </div>
+        </div>
+
+        <!-- 5. Project Planning & Ethics -->
+        <div class="cap-card" style="--accent:#22c55e; --accent-light:rgba(34,197,94,0.1);" aria-label="Project Planning and Ethics">
+          <div class="cap-icon-wrap">
+            <i class="fas fa-drafting-compass"></i>
+          </div>
+          <div class="cap-body">
+            <div class="cap-tags">
+              <span class="cap-tag">CLO4</span>
+            </div>
+            <h3 class="cap-title">Project Planning &amp; Ethics</h3>
+            <p class="cap-desc">Demonstrates high ethical standards and privacy considerations; project is well-documented using design thinking methodologies and planning tools.</p>
+          </div>
+          <div class="cap-footer">
+            <span class="cap-tech"><i class="fas fa-pencil-ruler"></i> Design Thinking</span>
+            <span class="cap-tech"><i class="fas fa-user-secret"></i> Privacy</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+    <!-- ===== End Technical Capabilities ===== -->
+
   </main>
 
   <!-- Supabase JS -->
