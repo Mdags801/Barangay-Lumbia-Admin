@@ -566,6 +566,23 @@ console.log('%c [System] Core Version 9.1 (Isolated & Stable) ', 'background: #1
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'incidents' }, payload => {
           const incident = payload.new;
           console.log('[Alarm] SIGNAL RECEIVED:', incident);
+          
+          // robust check: If the incident is older than 5 minutes, it is definitely being restored from the archive!
+          const reportedTime = new Date(incident.reportedAt || incident.time || Date.now());
+          const ageMinutes = (Date.now() - reportedTime.getTime()) / 60000;
+          
+          if (ageMinutes > 5) {
+             console.log('[Alarm] Skipping siren: this is an old incident being restored from the archive.');
+             return;
+          }
+
+          // Skip siren for resolved/archived incidents that are being restored from archive
+          const status = (incident.status || '').toLowerCase();
+          if (status.includes('resolv') || status.includes('archiv')) {
+             console.log('[Alarm] Skipping siren for resolved/archived incident (restored from archive).');
+             return;
+          }
+          
           alarmQueue.push(incident);
           if (!isShowingAlarm) showNextAlarm();
         })

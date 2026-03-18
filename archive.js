@@ -281,7 +281,7 @@
               .from('incidents')
               .insert([{
                 ...incidentData,
-                status: incidentData.status || 'Pending'
+                status: incidentData.status || 'Resolved'
                 // reportedAt is already inside incidentData
               }]);
 
