@@ -583,10 +583,57 @@ filterButtons.forEach(btn => {
 });
 
 // ---------- Modal actions ----------
+let newReportMap = null;
+let newReportMarker = null;
+
 if (openReportBtn) {
   openReportBtn.onclick = () => {
     reportModal.style.display = "flex";
     reportModal.setAttribute("aria-hidden", "false");
+    
+    // Initialize the manual report map
+    if (!newReportMap) {
+      setTimeout(() => {
+        const mapContainer = document.getElementById("reportMap");
+        if (!mapContainer) return;
+        
+        // Default to Cagayan de Oro coordinates
+        newReportMap = L.map("reportMap", { attributionControl: false }).setView([8.4833, 124.6500], 13);
+        L.tileLayer(`https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`, {
+          attribution: "© MapTiler © OpenStreetMap"
+        }).addTo(newReportMap);
+        
+        // Custom pin icon
+        const redIcon = L.divIcon({
+          className: '',
+          html: '<div style="color:#ef4444; font-size:2rem; filter:drop-shadow(0 4px 6px rgba(0,0,0,0.3));"><i class="fas fa-map-marker-alt"></i></div>',
+          iconSize: [24, 34],
+          iconAnchor: [12, 34]
+        });
+
+        newReportMap.on('click', async function(e) {
+          const lat = e.latlng.lat;
+          const lng = e.latlng.lng;
+          
+          document.getElementById('newLat').value = lat.toFixed(5);
+          document.getElementById('newLng').value = lng.toFixed(5);
+          
+          if (newReportMarker) {
+             newReportMarker.setLatLng(e.latlng);
+          } else {
+             newReportMarker = L.marker(e.latlng, {icon: redIcon}).addTo(newReportMap);
+          }
+
+          // Automatically reverse geocode and fill the Location input
+          const address = await reverseGeocode(lat, lng);
+          if (address) {
+             document.getElementById('newLocation').value = address;
+          }
+        });
+      }, 100);
+    } else {
+      setTimeout(() => newReportMap.invalidateSize(), 150);
+    }
   };
 }
 
@@ -594,7 +641,13 @@ if (closeReportBtn) {
   closeReportBtn.onclick = () => {
     reportModal.style.display = "none";
     reportModal.setAttribute("aria-hidden", "true");
-    reportForm.reset();
+    if (reportForm) reportForm.reset();
+    
+    // Clear the map pin when modal is closed
+    if (newReportMarker && newReportMap) {
+      newReportMap.removeLayer(newReportMarker);
+      newReportMarker = null;
+    }
   };
 }
 
