@@ -597,9 +597,9 @@ if (openReportBtn) {
         const mapContainer = document.getElementById("reportMap");
         if (!mapContainer) return;
         
-        // Default to Lumbia Barangay Hall coordinates
-        const hqLat = 8.4237;
-        const hqLng = 124.6293;
+        // Default to Lumbia Barangay Hall coordinates (user provided)
+        const hqLat = 8.3976;
+        const hqLng = 124.5969;
         newReportMap = L.map("reportMap", { attributionControl: false }).setView([hqLat, hqLng], 17);
         L.tileLayer(`https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`, {
           attribution: "© MapTiler © OpenStreetMap"
