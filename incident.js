@@ -597,13 +597,24 @@ if (openReportBtn) {
         const mapContainer = document.getElementById("reportMap");
         if (!mapContainer) return;
         
-        // Default to Cagayan de Oro coordinates
-        newReportMap = L.map("reportMap", { attributionControl: false }).setView([8.4833, 124.6500], 13);
+        // Default to Lumbia Barangay Hall coordinates
+        const hqLat = 8.4237;
+        const hqLng = 124.6293;
+        newReportMap = L.map("reportMap", { attributionControl: false }).setView([hqLat, hqLng], 17);
         L.tileLayer(`https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`, {
           attribution: "© MapTiler © OpenStreetMap"
         }).addTo(newReportMap);
         
-        // Custom pin icon
+        // Permanent Barangay Hall HQ marker
+        const hqIcon = L.divIcon({
+          className: '',
+          html: '<div style="color:#2563eb; font-size:2.2rem; filter:drop-shadow(0 4px 6px rgba(0,0,0,0.4)); text-align:center;"><i class="fas fa-building"></i><div style="font-size:0.6rem; font-weight:900; background:#1e3a8a; color:#fff; border-radius:4px; padding:2px 4px; margin-top:-4px;">HQ</div></div>',
+          iconSize: [40, 50],
+          iconAnchor: [20, 50]
+        });
+        L.marker([hqLat, hqLng], {icon: hqIcon}).addTo(newReportMap).bindTooltip("Barangay Lumbia Hall");
+        
+        // Custom red pin icon for the emergency
         const redIcon = L.divIcon({
           className: '',
           html: '<div style="color:#ef4444; font-size:2rem; filter:drop-shadow(0 4px 6px rgba(0,0,0,0.3));"><i class="fas fa-map-marker-alt"></i></div>',
